@@ -1,0 +1,40 @@
+<!-- INCLUDE overall_header.html -->
+
+<div class="panel bg2">
+	<div class="inner"><span class="corners-top"><span></span></span>
+	<h2>{U_QUIZ_NAME}</h2>
+	<span>{U_POSTED_INFORMATION}</span>
+	<span class="corners-bottom"><span></span></span></div>
+</div>
+
+<form method="post" action="{S_SUBMIT_QUIZ_ACTION}">
+<div class="panel">
+	<div class="inner"><span class="corners-top"><span></span></span>
+		<fieldset>
+		<!-- BEGIN question_row -->
+		<dl>
+			<dt>
+				<span><strong>{question_row.U_QUESTION_NAME}</strong></span>
+			</dt>
+			<dd>
+				<!-- BEGIN answer_row -->
+					<input type="radio" name="answer_{question_row.U_QUESTION_ID}" value="{question_row.answer_row.U_ANSWER_ID}" /> {question_row.answer_row.U_ANSWER_NAME}<br />
+				<!-- END answer_row -->
+			</dd>
+		</dl>
+		<!-- END question_row -->
+		</fieldset>
+	<span class="corners-bottom"><span></span></span></div>
+</div>
+
+<div class="panel bg3">
+	<div class="inner"><span class="corners-top"><span></span></span>
+		<fieldset class="submit-buttons"> 
+			{S_FORM_TOKEN}
+			<input type="submit" name="submit" value="{L_SUBMIT}" class="button1" />
+		</fieldset>
+	<span class="corners-bottom"><span></span></span></div>
+</div>
+</form>
+
+<!-- INCLUDE overall_footer.html -->

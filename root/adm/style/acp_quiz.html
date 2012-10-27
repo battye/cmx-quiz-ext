@@ -1,0 +1,35 @@
+<!-- INCLUDE overall_header.html -->  
+<form method="post" action="{S_FORM_ACTION}">
+	<h1>{L_ACP_UQM_QUIZ_CATEGORIES}</h1>
+	
+	<fieldset>
+	<legend>{L_ACP_UQM_QUIZ_CATEGORIES}</legend>
+		<!-- BEGIN category_row -->
+		<dl>
+			<dt><label>{category_row.CATEGORY_NAME}</label></dt>
+			<dd><a href="{category_row.EDIT_LINK}">{L_ACP_UQM_EDIT_CATEGORY}</a><br /><a href="{category_row.DELETE_LINK}">{L_ACP_UQM_DELETE_CATEGORY}</a></dd>
+		</dl>
+		<!-- END category_row -->
+		<dl>
+			<dt>&nbsp;</dt>
+			<dd>{U_ADD_CATEGORY}</dd>
+		</dl>
+	</fieldset>
+
+	<h1>{L_ACP_UQM_QUIZ_CONFIGURATION}</h1>
+	
+	<fieldset>
+	<legend>{L_ACP_UQM_QUIZ_CONFIGURATION}</legend>
+		<!-- BEGIN configuration_row -->
+		<dl>
+			<dt><label>{configuration_row.CONFIGURATION_LANG}</label><br /><span>{configuration_row.CONFIGURATION_LANG_EXPLAIN}</span></dt>
+			<dd><!-- IF configuration_row.CONFIGURATION_TYPE eq 'radio' --><input type="radio" name="{configuration_row.CONFIGURATION_NAME}" value="1" <!-- IF configuration_row.CONFIGURATION_VALUE -->checked <!-- ENDIF -->/> {L_YES} &nbsp; <input type="radio" name="{configuration_row.CONFIGURATION_NAME}" value="0" <!-- IF not configuration_row.CONFIGURATION_VALUE -->checked <!-- ENDIF -->/> {L_NO}<!-- ELSE --><input type="text" name="{configuration_row.CONFIGURATION_NAME}" value="{configuration_row.CONFIGURATION_VALUE}" /><!-- ENDIF --></dd>
+		</dl>
+		<!-- END configuration_row -->
+
+		<p class="quick">
+		<input class="button1" type="submit" name="submit" value="{L_SUBMIT}" />
+		</p>
+	</fieldset>
+</form>
+<!-- INCLUDE overall_footer.html -->

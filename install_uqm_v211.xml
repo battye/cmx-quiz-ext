@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<?xml-stylesheet type="text/xsl" href="modx.prosilver.en.xsl"?>
+<!--NOTICE: Please open this file in your web browser. If presented with a security warning, you may safely tell it to allow the blocked content.-->
+<!--For security purposes, please check: http://www.phpbb.com/mods/ for the latest version of this MOD.\nAlthough MODs are checked before being allowed in the MODs Database there is no guarantee that there are no security problems within the MOD.\nNo support will be given for MODs not found within the MODs Database which can be found at http://www.phpbb.com/mods/-->
+<mod xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.phpbb.com/mods/xml/modx-1.2.5.xsd">
+	<header>
+		<meta name="generator" content="MODX file generated with PP MODX Creator by tumba25 (online version)"/>
+		<license><![CDATA[http://opensource.org/licenses/gpl-license.php GNU General Public License v2]]></license>
+		<title lang="en"><![CDATA[Ultimate Quiz MOD]]></title>
+		<description lang="en"><![CDATA[Ultimate Quiz MOD is a powerful quiz solution for phpBB3 that allows users and administrators to upload and play quizzes.]]></description>
+		<author-notes lang="en"><![CDATA[v2.1.1 - 2nd Alpha (Feb 18)]]></author-notes>
+		<author-group>
+			<author>
+				<username><![CDATA[battye]]></username>
+				<homepage><![CDATA[http://www.cricketmx.com]]></homepage>
+			</author>
+		</author-group>
+		<mod-version>2.1.1</mod-version>
+		<installation>
+			<level>easy</level>
+			<time>120</time>
+			<target-version>3.0.8</target-version>
+		</installation>
+	</header>
+	<action-group>
+		<copy>
+			<file from="root/quiz.php" to="quiz.php"/>
+			<file from="root/quiz_installer.php" to="quiz_installer.php"/>
+			<file from="root/includes/quiz/quiz.php" to="includes/quiz/quiz.php"/>
+			<file from="root/includes/quiz/quiz_configuration.php" to="includes/quiz/quiz_configuration.php"/>
+			<file from="root/includes/quiz/quiz_question.php" to="includes/quiz/quiz_question.php"/>
+			<file from="root/includes/quiz/quiz_statistics.php" to="includes/quiz/quiz_statistics.php"/>
+			<file from="root/language/en/mods/quiz.php" to="language/en/mods/quiz.php"/>
+			<file from="root/styles/prosilver/template/quiz_body.html" to="styles/prosilver/template/quiz_body.html"/>
+			<file from="root/styles/prosilver/template/quiz_edit_body.html" to="styles/prosilver/template/quiz_edit_body.html"/>
+			<file from="root/styles/prosilver/template/quiz_installer_body.html" to="styles/prosilver/template/quiz_installer_body.html"/>
+			<file from="root/styles/prosilver/template/quiz_play_body.html" to="styles/prosilver/template/quiz_play_body.html"/>
+			<file from="root/styles/prosilver/template/quiz_results_body.html" to="styles/prosilver/template/quiz_results_body.html"/>
+			<file from="root/styles/prosilver/template/quiz_statistics_body.html" to="styles/prosilver/template/quiz_statistics_body.html"/>
+			<file from="root/styles/prosilver/template/quiz_submit_body.html" to="styles/prosilver/template/quiz_submit_body.html"/>
+			<file from="root/adm/style/acp_quiz.html" to="adm/style/acp_quiz.html"/>
+			<file from="root/adm/style/acp_quiz_category.html" to="adm/style/acp_quiz_category.html"/>
+			<file from="root/includes/acp/acp_quiz.php" to="includes/acp/acp_quiz.php"/>
+			<file from="root/includes/acp/info/acp_quiz.php" to="includes/acp/info/acp_quiz.php"/>
+			<file from="root/language/en/acp/quiz.php" to="language/en/acp/quiz.php"/>
+		</copy>
+		<open src="includes/functions.php">
+			<edit>
+				<find><![CDATA[	// The following assigns all _common_ variables that may be used at any point in a template.]]></find>
+				<action type="before-add"><![CDATA[	$user->add_lang('mods/quiz'); // Get quiz language variables]]></action>
+			</edit>
+			<edit>
+				<find><![CDATA[		'U_PRIVATEMSGS'			=> append_sid("{$phpbb_root_path}ucp.$phpEx", 'i=pm&amp;folder=inbox'),]]></find>
+				<action type="before-add"><![CDATA[		'U_QUIZ'				=> append_sid("{$phpbb_root_path}quiz.$phpEx"),]]></action>
+			</edit>
+		</open>
+		<open src="language/en/acp/common.php">
+			<edit>
+				<find><![CDATA[$lang = array_merge($lang, array(]]></find>
+				<action type="after-add"><![CDATA[	// Quiz Admin
+	'ACP_UQM_QUIZ' => 'Quiz',]]></action>
+			</edit>
+		</open>
+		<open src="styles/prosilver/template/overall_header.html">
+			<edit>
+				<find><![CDATA[				<li class="icon-faq"><a href="{U_FAQ}" title="{L_FAQ_EXPLAIN}">{L_FAQ}</a></li>]]></find>
+				<action type="before-add"><![CDATA[				<li class="icon-faq"><a href="{U_QUIZ}" title="{L_UQM_QUIZ_EXPLAIN}">{L_UQM_QUIZ}</a></li>
+]]></action>
+			</edit>
+		</open>
+		<php-installer><![CDATA[quiz_installer.php]]></php-installer>
+		<diy-instructions lang="en"><![CDATA[Please run quiz_installer.php to create the required database tables. To install the ACP quiz module, go to the ACP -> System -> Module Management -> Administration Control Panel -> and select "Quiz" from the "add module list" on the bottom right.]]></diy-instructions>
+	</action-group>
+</mod>

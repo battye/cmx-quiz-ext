@@ -1,0 +1,83 @@
+<!-- INCLUDE overall_header.html -->
+<form method="post" action="{S_SUBMIT_QUIZ_ACTION}">
+
+<!-- IF U_UQM_DISPLAY_MESSAGE -->
+<div class="panel bg3">
+	<div class="inner"><span class="corners-top"><span></span></span>
+		<span>{U_UQM_DISPLAY_MESSAGE}</span>
+	</fieldset>
+	<span class="corners-bottom"><span></span></span></div>
+</div>
+<!-- ENDIF -->
+
+<div class="panel">
+	<div class="inner"><span class="corners-top"><span></span></span>
+		<h3>{L_UQM_SUBMIT_QUIZ}</h3>
+	
+		<fieldset>
+		<!-- IF U_UQM_CONFIRM -->
+		<dl>
+			<dt><span><strong>{L_UQM_ENTER_QUIZ_NAME}:</span></strong></dt>
+			<dd><input type="text" name="quiz_name" /></dd>
+		</dl>
+
+		<dl>
+			<dt>&nbsp;</dt>
+			<dd>&nbsp;</dd>
+		</dl>
+
+		<dl>
+			<dt><span><strong>{L_UQM_ENTER_QUIZ_CATEGORY}:</span></strong></dt>
+			<dd>{U_QUIZ_CATEGORY_SELECT}</dd>
+		</dl>
+
+		<dl>
+			<dt>&nbsp;</dt>
+			<dd>&nbsp;</dd>
+		</dl>
+		<!-- ENDIF -->
+		<!-- BEGIN question_row -->
+		<dl>
+			<dt>
+				<span><strong>{L_UQM_ENTER_QUESTION}:</span></strong><br /><span>{L_UQM_ENTER_QUESTION_EXPLAIN}</span><br /><br />
+				<textarea cols="45" rows="2" name="question_name_{question_row.U_QUESTION_ID}">{question_row.U_QUESTION}</textarea>
+			</dt>
+			<dd>
+				<!-- IF U_UQM_CONFIRM -->
+				<span><strong>{L_UQM_SELECT_ANSWERS}:</span></strong><br /><span>{L_UQM_SELECT_ANSWERS_EXPLAIN}</span><br /><br />
+					<!-- BEGIN answer_row -->
+					<input type="radio" name="answer_{question_row.U_QUESTION_ID}" value="{question_row.answer_row.U_ANSWER_ID}" /> {question_row.answer_row.U_ANSWER_NAME}<br />
+					<input type="hidden" name="answers_{question_row.U_QUESTION_ID}" value="{question_row.U_ANSWERS}" />
+					<!-- END answer_row -->
+				<!-- ELSE -->
+				<span><strong>{L_UQM_ENTER_ANSWERS}:</span></strong><br /><span>{L_UQM_ENTER_ANSWERS_EXPLAIN}</span><br /><br />
+				<textarea cols="20" rows="{U_MAX_MULTIPLE_CHOICE}" name="answers_{question_row.U_QUESTION_ID}">{question_row.U_ANSWERS}</textarea>
+				<!-- ENDIF -->
+			</dd>
+		</dl>
+
+		<dl>
+			<dt>&nbsp;</dt>
+			<dd>&nbsp;</dd>
+		</dl>
+		<!-- END question_row -->
+		</fieldset>
+
+		<span class="corners-bottom"><span></span></span>
+	</div>
+</div>
+
+<div class="panel bg3">
+	<div class="inner"><span class="corners-top"><span></span></span>
+		<fieldset class="submit-buttons"> 
+		{S_HIDDEN_FIELDS}
+		{S_FORM_TOKEN}
+		<input type="submit" name="submit" value="{L_SUBMIT}" class="button1" />
+		<!-- IF U_UQM_DISPLAY_ADD -->&nbsp; <input type="submit" name="alter_question" value="{L_UQM_PLUS_QUESTION}" class="button2" /><!-- ENDIF -->
+		<!-- IF U_UQM_DISPLAY_REMOVE -->&nbsp; <input type="submit" name="alter_question" value="{L_UQM_MINUS_QUESTION}" class="button2" /><!-- ENDIF -->
+	</fieldset>
+	<span class="corners-bottom"><span></span></span></div>
+</div>
+</form>
+
+<!-- INCLUDE overall_footer.html -->

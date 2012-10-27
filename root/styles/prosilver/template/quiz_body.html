@@ -1,0 +1,34 @@
+<!-- INCLUDE overall_header.html -->
+
+<!-- IF U_UQM_SUBMIT -->
+<div align="right">
+	<span><a href="{U_UQM_SUBMIT}">{L_SUBMIT_UPPER}</a></span>
+</div>
+<!-- ENDIF -->
+
+<!-- BEGIN category_row -->
+<div class="forumbg forumbg-table">
+	<div class="inner"><span class="corners-top"><span></span></span>
+		<table class="table1" cellspacing="1">
+			<thead>
+				<tr>
+					<th width="100%" align="left" colspan="4"><a href="{category_row.U_CATEGORY_LINK}">{category_row.U_CATEGORY_NAME}</a></th>
+				</tr>
+			</thead>
+
+			<tbody>
+			<!-- BEGIN quiz_row -->
+				<tr class="bg1">
+					<td width="35%"><a href="{category_row.quiz_row.U_QUIZ_LINK}">{category_row.quiz_row.U_QUIZ_NAME}</a></td>
+					<td width="25%">{category_row.quiz_row.U_QUIZ_AUTHOR}</td>
+					<td width="20%">{category_row.quiz_row.U_QUIZ_DATE}</td>
+					<td width="20%">{category_row.quiz_row.U_QUIZ_INFO}</td>
+				</tr>
+			<!-- END quiz_row -->
+			</tbody>
+		</table>
+	<span class="corners-bottom"><span></span></span></div>
+</div>
+<!-- END category_row -->
+
+<!-- INCLUDE overall_footer.html -->

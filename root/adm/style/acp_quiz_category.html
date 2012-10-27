@@ -1,0 +1,18 @@
+<!-- INCLUDE overall_header.html -->  
+<form method="post" action="{S_FORM_ACTION}">
+	<h1>{L_ACP_UQM_QUIZ_CATEGORIES}</h1>
+	
+	<fieldset>
+	<legend>{L_ACP_UQM_QUIZ_CONFIGURATION}</legend>
+		<dl>
+			<dt><label>{L_ACP_UQM_CATEGORY_NAME}:</label></dt>
+			<dd><input type="text" name="category_name" value="{U_CATEGORY_VALUE}" /></dd>
+		</dl>
+
+		<p class="quick">
+		{S_FORM_TOKEN}
+		<input class="button1" type="submit" name="submit" value="{L_SUBMIT}" />
+		</p>
+	</fieldset>
+</form>
+<!-- INCLUDE overall_footer.html -->
