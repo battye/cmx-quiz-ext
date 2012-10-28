@@ -42,7 +42,7 @@ class quiz_configuration
 			'qc_show_answers'			=> $this->generate_config_array('qc_show_answers', 'radio'),
 			'qc_quiz_author_edit'		=> $this->generate_config_array('qc_quiz_author_edit', 'radio'),
 			'qc_admin_submit_only'		=> $this->generate_config_array('qc_admin_submit_only', 'radio'), 
-			'qc_enable_time_limits'		=> $this->generate_config_array('qc_enable_time_limits', 'input'),
+			'qc_enable_time_limits'		=> $this->generate_config_array('qc_enable_time_limits', 'radio'),
 			'qc_exclusion_time'			=> $this->generate_config_array('qc_exclusion_time', 'input'),
 
 			'qc_cash_enabled'			=> $this->generate_config_array('qc_cash_enabled', 'input'),
