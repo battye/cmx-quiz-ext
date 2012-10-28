@@ -96,6 +96,9 @@ $lang = array_merge($lang, array(
 	'UQM_INSTALLING_FINISHED'		=> 'Installation is finished with no errors.',
 	'UQM_INSTALLING_SUPPORT'		=> 'For support, please visit <a href="http://forums.cricketmx.com/viewforum.php?f=63">CricketMX.com</a> or <a href="http://www.phpbb.com">phpBB MOD support topic</a>.',
 	'UQM_INSTALLING_ADMIN_ONLY'		=> 'Only administrators can run this installer.',
+
+	'UQM_TIME_LIMIT_VIOLATED'	=> 'You cannot play this quiz for another <strong>%d</strong> minutes as you have violated the time limit on a previous attempt.',
+	'UQM_END_SESSION_ERROR'		=> 'Unable to end the session, as no session for this quiz could be found.',
 ));
 
 ?>

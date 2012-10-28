@@ -256,12 +256,15 @@ switch($mode)
 				// Update progress count
 				($is_correct) ? $user_correct_answers++ : $user_incorrect_answers++;
 
+				// Even if we don't use the message, we want to populate the statistics array
+				$results_message = $question->obtain_result_data($actual_answer, $db_answer, $question->show_question_id());
+
 				if( $quiz_configuration->value('qc_show_answers') )
 				{
 					$template->assign_block_vars('result_row', array(
 						'U_QUESTION_NAME'	=> $question->show_question(),
 						'U_STATUS'		=> $is_correct,
-						'U_MESSAGE'		=> $question->obtain_result_data($actual_answer, $db_answer, $question->show_question_id()),
+						'U_MESSAGE'		=> $results_message,
 					));
 
 				}
@@ -282,14 +285,20 @@ switch($mode)
 				'body' => 'quiz_results_body.html')
 			);
 
+			// End the quiz session - do this before updating anything else
+			$quiz_session_id = $play->update_quiz_session($quiz_id);
+
 			// Update the statistics, as the SQL array's are still stored in the static variable
-			$question->obtain_result_data();
+			$question->obtain_result_data(null, null, null, $quiz_session_id);
 
 			// Finish the results by checking if cash compatibility is enabled
 			$quiz_configuration->cash($user_correct_answers, $user_incorrect_answers);
 
 			page_footer();
 		}
+
+		// The actual play quiz page - start a new quiz session
+		$play->insert_quiz_session($quiz_id);
 
 		foreach( $play_quiz as $question )
 		{

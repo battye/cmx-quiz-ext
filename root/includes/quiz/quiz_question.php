@@ -39,11 +39,11 @@ class quiz_question
 		global $db, $user;
 
 		$quiz_array = array(
-			'quiz_name'		=> utf8_normalize_nfc($quiz_name),
-			'quiz_time'		=> time(),
+			'quiz_name'			=> utf8_normalize_nfc($quiz_name),
+			'quiz_time'			=> time(),
 			'quiz_category'		=> (int) $quiz_category,
-			'user_id'		=> (int) $user->data['user_id'],
-			'username'		=> $user->data['username_clean'],
+			'user_id'			=> (int) $user->data['user_id'],
+			'username'			=> $user->data['username_clean'],
 			'user_colour'		=> $user->data['user_colour'],
 		);
 
@@ -157,8 +157,115 @@ class quiz_question
 		return $object_array;
 	}
 
+	function get_session_status($quiz_id, $user_id, $current_time)
+	{
+		global $db, $quiz_configuration;
+
+		// We want to see if there are any existing quiz sessions for this user and for this quiz, where
+		// the started time + the exclusion period is greater than the current time. So the user is still excluded.
+		$sql = 'SELECT * 
+				FROM ' . QUIZ_SESSIONS_TABLE . '
+				WHERE user_id = ' . (int) $user_id . '
+					AND quiz_id = ' . (int) $quiz_id . '
+					AND started IS NOT NULL 
+					AND ended IS NULL
+					AND started > (' . ($current_time - (int) $quiz_configuration->value('qc_exclusion_time')) . ')
+				ORDER BY started DESC';
+
+		$result = $db->sql_query($sql);
+		
+		$object_array = array();
+
+		while ($row = $db->sql_fetchrow($result))
+		{
+			$object_array[] = $row;
+		}
+
+		return $object_array;
+	}
+
+	// Inserts a new quiz session if the user has not recently played this quiz and failed to finish
+	// (validation against cheating - if a user doesn't finish a quiz they must wait X amount of time before re-playing)
+	function insert_quiz_session($quiz_id)
+	{
+		global $user, $db, $quiz_configuration;
+
+		// Only worry about this if time limits are enabled
+		if ($quiz_configuration->value('qc_enable_time_limits'))
+		{
+			// Exclusion time
+			$current_time = time();
+
+			$session_status = $this->get_session_status($quiz_id, $user->data['user_id'], $current_time);
+			$results_returned = sizeof($session_status);
+
+			// Get the most recent starting time (for sessions by this user for this quiz that have not ended)
+			$started_time = ($results_returned > 0) ? $session_status[$results_returned - 1]['started'] : -1;
+
+			// If there are results, then the user has recently started a quiz without finishing
+			// ie. they violated the time limit restriction
+			if ($started_time > 0)	
+			{
+				// All of this is ignored if the user is not currently in a valid session
+				$exclusion_period_expire_time = $started_time + (int) $quiz_configuration->value('qc_exclusion_time');
+				$exclusion_period_time_remaining = $exclusion_period_expire_time - $current_time;
+
+				// If true, the user still has time to serve on their exclusion
+				if( $exclusion_period_time_remaining > 0 )
+				{
+					// Don't display seconds to the user. Round up to the nearest minute.
+					$minutes_remaining = ceil($exclusion_period_time_remaining / 60);
+
+					trigger_error(sprintf($user->lang['UQM_TIME_LIMIT_VIOLATED'], $minutes_remaining));
+				}
+			}
+		}
+
+		// If validations have passed then the user is okay to play the quiz, so we add a quiz session row.
+		$quiz_session_array = array(
+			'quiz_id'	=> (int) $quiz_id,
+			'user_id'	=> (int) $user->data['user_id'],
+			'started'	=> time(),
+		);
+
+		$db->sql_query('INSERT INTO ' . QUIZ_SESSIONS_TABLE . ' ' . $db->sql_build_array('INSERT', $quiz_session_array));
+	}
+
+	// Ends a quiz session
+	function update_quiz_session($quiz_id)
+	{
+		global $user, $db;
+
+		$current_time = time();
+
+		$session_status = $this->get_session_status($quiz_id, $user->data['user_id'], $current_time);
+		$results_returned = sizeof($session_status);
+
+		// Use the latest session
+		$quiz_session_id = ($results_returned > 0) ? $session_status[$results_returned - 1]['quiz_session_id'] : -1;
+
+		// End the quiz session
+		if ($quiz_session_id > 0)
+		{
+			// Set the ending time for the quiz session
+			$sql = 'UPDATE ' . QUIZ_SESSIONS_TABLE . '
+					SET ended = ' . $current_time . '
+					WHERE quiz_session_id = ' . $quiz_session_id;
+
+			$db->sql_query($sql);
+		}
+
+		// This generally shouldn't happen. It is a safeguard against a user trying to submit a quiz twice though.
+		else
+		{
+			trigger_error('UQM_END_SESSION_ERROR');
+		}
+
+		return $quiz_session_id;
+	}
+
 	// Output the results, $actual is the actual answer while $submitted is what the user chose
-	function obtain_result_data($actual = null, $submitted = null, $question_id = null)
+	function obtain_result_data($actual = null, $submitted = null, $question_id = null, $quiz_session_id = null)
 	{
 		global $user, $db;
 		static $statistics_array = array();
@@ -166,6 +273,13 @@ class quiz_question
 		// Run the database query
 		if( empty($actual) && empty($submitted) )
 		{
+			// Enforce the session id on the statistics
+			foreach ($statistics_array as &$statistic)
+			{
+				// Update the reference
+				$statistic['quiz_session_id'] = $quiz_session_id;
+			}
+
 			$db->sql_multi_insert(QUIZ_STATISTICS_TABLE, $statistics_array);
 			$question_result = null;
 		}
@@ -177,11 +291,12 @@ class quiz_question
 			// edits may change those array positions.
 
 			$statistics_array[] = array(
-				'quiz_question_id'	=> (int) $question_id,
-				'quiz_user_answer'	=> (string) $submitted,
+				'quiz_question_id'		=> (int) $question_id,
+				'quiz_user_answer'		=> (string) $submitted,
 				'quiz_actual_answer'	=> (string) $actual,
-				'quiz_is_correct'	=> (int) ($submitted == $actual) ? 1 : 0,
-				'quiz_user'		=> (int) $user->data['user_id'],
+				'quiz_is_correct'		=> (int) ($submitted == $actual) ? 1 : 0,
+				'quiz_user'				=> (int) $user->data['user_id'],
+				'quiz_session_id'		=> null,
 			);
 
 			$question_result = sprintf($user->lang['UQM_QUIZ_USER_SELECTED'], $submitted, $actual);
@@ -203,8 +318,8 @@ class quiz_question
 		{
 			$question_name	= request_var('question_name_' . $i, '');
 			$answers_name	= request_var('answers_' . $i, '');
-			$multiples 	= explode("\n", $answers_name);
-			$correct	= request_var('answer_' . $i, '');
+			$multiples 		= explode("\n", $answers_name);
+			$correct		= request_var('answer_' . $i, '');
 
 			if( !$check_empty )
 			{
