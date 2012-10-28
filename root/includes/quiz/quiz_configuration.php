@@ -16,22 +16,49 @@ class quiz_configuration
 	{
 		global $config;
 
-		// Load in configuration values from config table
-		$this->qc_config_array = array('qc_minimum_questions', 'qc_maximum_questions', 'qc_maximum_choices', 'qc_show_answers', 'qc_quiz_author_edit', 'qc_admin_submit_only', 'qc_cash_enabled', 'qc_cash_column', 'qc_cash_correct', 'qc_cash_incorrect');
-		$this->qc_config_value = array(
-			'qc_minimum_questions'		=> array('value' => $config['qc_minimum_questions'], 'type' => 'input'),
-			'qc_maximum_questions'		=> array('value' => $config['qc_maximum_questions'], 'type' => 'input'),
-			'qc_maximum_choices'		=> array('value' => $config['qc_maximum_choices'], 'type' => 'input'),
-			'qc_show_answers'		=> array('value' => $config['qc_show_answers'], 'type' => 'radio'), // show the answers after a quiz
-			'qc_quiz_author_edit'		=> array('value' => $config['qc_quiz_author_edit'], 'type' => 'radio'), // allow the author to edit their own quiz
-			'qc_admin_submit_only'		=> array('value' => $config['qc_admin_submit_only'], 'type' => 'radio'), // only administrators are allowed to submit quizzes
-
-			// Cash compatibility
-			'qc_cash_enabled'		=> array('value' => $config['qc_cash_enabled'], 'type' => 'radio'), // enable cash functionality
-			'qc_cash_column'		=> array('value' => $config['qc_cash_column'], 'type' => 'input'), // associated column in the users table
-			'qc_cash_correct'		=> array('value' => $config['qc_cash_correct'], 'type' => 'input'), // cash gained for a correct answer
-			'qc_cash_incorrect'		=> array('value' => $config['qc_cash_incorrect'], 'type' => 'input'), // cash REMOVED for an incorect answer
+		// Load in configuration fields from config table
+		$this->qc_config_array = array(
+			'qc_minimum_questions',			// minimum number of questions allowed
+			'qc_maximum_questions',			// maximum number of questions allowed
+			'qc_maximum_choices',			// maximum number of multiple choices
+			'qc_show_answers',				// show the answers after a quiz
+			'qc_quiz_author_edit',			// allow the author to edit their own quiz
+			'qc_admin_submit_only',			// only administrators are allowed to submit quizzes
+			'qc_enable_time_limits', 		// are time limits on or off
+			'qc_exclusion_time',			// exclusion time (seconds) if a user violates the time limit
+			'qc_cash_enabled',				// enable cash functionality
+			'qc_cash_column', 				// associated column in the users table
+			'qc_cash_correct',				// cash gained for a correct answer
+			'qc_cash_incorrect',			// cash deducted for an incorect answer 
 		);
+
+		// Get their values. We'll define the keys and values separately in case we need to
+		// manipulate the values at some point in the future.
+		$this->qc_config_value = array(
+			'qc_minimum_questions'		=> $this->generate_config_array('qc_minimum_questions', 'input'),
+			'qc_maximum_questions'		=> $this->generate_config_array('qc_maximum_questions', 'input'),
+			'qc_maximum_choices'		=> $this->generate_config_array('qc_maximum_choices', 'input'),
+
+			'qc_show_answers'			=> $this->generate_config_array('qc_show_answers', 'radio'),
+			'qc_quiz_author_edit'		=> $this->generate_config_array('qc_quiz_author_edit', 'radio'),
+			'qc_admin_submit_only'		=> $this->generate_config_array('qc_admin_submit_only', 'radio'), 
+			'qc_enable_time_limits'		=> $this->generate_config_array('qc_enable_time_limits', 'input'),
+			'qc_exclusion_time'			=> $this->generate_config_array('qc_exclusion_time', 'input'),
+
+			'qc_cash_enabled'			=> $this->generate_config_array('qc_cash_enabled', 'input'),
+			'qc_cash_column'			=> $this->generate_config_array('qc_cash_column', 'input'),
+
+			'qc_cash_correct'			=> $this->generate_config_array('qc_cash_correct', 'input'), 
+			'qc_cash_incorrect'			=> $this->generate_config_array('qc_cash_incorrect', 'input'), 
+		);
+	}
+
+	// Rather than creating an array each time we can use this function to make it for us
+	function generate_config_array($configuration_name, $input_type)
+	{
+		global $config;
+
+		return array('value' => $config[$configuration_name], 'type' => $input_type);
 	}
 
 	// Return this list of config values
