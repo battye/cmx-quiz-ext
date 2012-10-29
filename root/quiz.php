@@ -327,6 +327,9 @@ switch($mode)
 		$template->assign_vars( array(
 			'S_SUBMIT_QUIZ_ACTION'	=> append_sid("{$phpbb_root_path}quiz.$phpEx", 'mode=play&amp;q=' . $quiz_id),
 			'U_QUIZ_NAME'		=> $quiz_information['quiz_name'],
+			'U_QUIZ_TIME_LIMIT'	=> $quiz_information['quiz_time_limit'],
+			'U_REDIRECT_QUIZ_INDEX'	=> append_sid('quiz.' . $phpEx),
+			'U_TIME_LIMIT_ENABLED'	=>  $quiz_configuration->value('qc_enable_time_limits'),
 			'U_POSTED_INFORMATION'	=> sprintf($user->lang['UQM_QUIZ_AUTHOR_DETAILS'], get_username_string('full', $quiz_information['user_id'], $quiz_information['username'], $quiz_information['user_colour']), $user->format_date($quiz_information['quiz_time'])),
 		));
 		
