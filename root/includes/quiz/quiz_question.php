@@ -157,20 +157,22 @@ class quiz_question
 		return $object_array;
 	}
 
+	// Get the incomplete and current sessions for this user and for this quiz 
 	function get_session_status($quiz_id, $user_id, $current_time)
 	{
 		global $db, $quiz_configuration;
 
 		// We want to see if there are any existing quiz sessions for this user and for this quiz, where
 		// the started time + the exclusion period is greater than the current time. So the user is still excluded.
-		$sql = 'SELECT * 
-				FROM ' . QUIZ_SESSIONS_TABLE . '
-				WHERE user_id = ' . (int) $user_id . '
-					AND quiz_id = ' . (int) $quiz_id . '
-					AND started IS NOT NULL 
-					AND ended IS NULL
-					AND started > (' . ($current_time - (int) $quiz_configuration->value('qc_exclusion_time')) . ')
-				ORDER BY started DESC';
+		$sql = 'SELECT s.*, q.quiz_time_limit 
+				FROM ' . QUIZ_SESSIONS_TABLE . ' s, ' . QUIZ_TABLE . ' q
+				WHERE s.quiz_id = q.quiz_id
+					AND s.user_id = ' . (int) $user_id . '
+					AND s.quiz_id = ' . (int) $quiz_id . '
+					AND s.started IS NOT NULL 
+					AND s.ended IS NULL
+					AND s.started > (' . ($current_time - (int) $quiz_configuration->value('qc_exclusion_time')) . ')
+				ORDER BY s.started DESC';
 
 		$result = $db->sql_query($sql);
 		
@@ -244,6 +246,24 @@ class quiz_question
 		// Use the latest session
 		$quiz_session_id = ($results_returned > 0) ? $session_status[$results_returned - 1]['quiz_session_id'] : -1;
 
+		// Check that the time limit hasn't expired
+		if ($results_returned > 0)
+		{
+			$recent_session = $session_status[$results_returned - 1];
+
+			$started_time 		= $recent_session['started'];
+			$quiz_time_limit	= $recent_session['quiz_time_limit'];
+
+			// This is the final time the user can submit
+			$last_finish_time_allowed = $started_time + $quiz_time_limit;
+
+			if ($current_time > $last_finish_time_allowed)
+			{
+				// It has expired
+				trigger_error('UQM_TIME_LIMIT_EXCEEDED');
+			}
+		}
+
 		// End the quiz session
 		if ($quiz_session_id > 0)
 		{
@@ -277,7 +297,7 @@ class quiz_question
 			foreach ($statistics_array as &$statistic)
 			{
 				// Update the reference
-				$statistic['quiz_session_id'] = $quiz_session_id;
+				$statistic['quiz_session_id'] = (int) $quiz_session_id;
 			}
 
 			$db->sql_multi_insert(QUIZ_STATISTICS_TABLE, $statistics_array);

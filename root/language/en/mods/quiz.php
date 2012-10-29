@@ -98,6 +98,7 @@ $lang = array_merge($lang, array(
 	'UQM_INSTALLING_ADMIN_ONLY'		=> 'Only administrators can run this installer.',
 
 	'UQM_TIME_LIMIT_VIOLATED'	=> 'You cannot play this quiz for another <strong>%d</strong> minutes as you have violated the time limit on a previous attempt.',
+	'UQM_TIME_LIMIT_EXCEEDED'	=> 'You have exceeded the time limit allowed for this quiz.',
 	'UQM_END_SESSION_ERROR'		=> 'Unable to end the session, as no session for this quiz could be found.',
 ));
 
