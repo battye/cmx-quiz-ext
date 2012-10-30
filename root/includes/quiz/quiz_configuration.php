@@ -192,6 +192,24 @@ class quiz_configuration
 		return $select;
 	}
 
+	// Create dropdown menus for time limits
+	function create_time_limit_dropdown($name, $low_limit, $high_limit, $selected = null)
+	{
+		$selected = (empty($selected)) ? $low_limit : $selected;
+
+		$select = '<select name="' . $name . '">';
+
+		for ($i = $low_limit; $i <= $high_limit; $i++)
+		{
+			$default = ($i == $selected) ? ' selected="selected"' : '';
+			$select .= '	<option value="' . $i . '"' . $default . '>' . $i . '</option>';
+		}
+
+		$select .= '</select>';
+	
+		return $select;
+	}
+
 	// Determine quiz percentage
 	function determine_percentage($numerator, $partial_denominator)
 	{

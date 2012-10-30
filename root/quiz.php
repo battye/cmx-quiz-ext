@@ -41,7 +41,10 @@ $quiz_configuration->breadcrumbs( array($user->lang['UQM_QUIZ'] => append_sid('q
 switch($mode)
 {
 	case 'submit':
+		// Create the breadcrumbs
 		$quiz_configuration->breadcrumbs( array($user->lang['UQM_SUBMIT_QUIZ'] => append_sid('quiz.'. $phpEx, 'mode=submit')) );
+
+		// Set the page header
 		page_header($user->lang['UQM_SUBMIT_QUIZ']);
 
 		$auth_params = array(
@@ -59,6 +62,9 @@ switch($mode)
 		$quiz_message	   = ''; // a message in case something unexpected happens and goes wrong
 		$current_questions = request_var('question_number', $quiz_configuration->value('qc_minimum_questions'));
 
+		// Create a variable seeing we are checking a few times...
+		$time_limits_enabled = ($quiz_configuration->value('qc_enable_time_limits')) ? true : false;
+
 		// Enter the questions and answers into the database
 		if( $submit_db )
 		{
@@ -67,14 +73,26 @@ switch($mode)
 				trigger_error('UQM_QUIZ_FORM_INVALID');
 			}
 
-			$check_correct	= $quiz_configuration->check_correct_checked($current_questions); // see if the user has left any empty
-			$quiz_name	= request_var('quiz_name', '');		
+			// See if the user has left any empty
+			$check_correct	= $quiz_configuration->check_correct_checked($current_questions); 
+
+			$quiz_name		= request_var('quiz_name', '');		
 			$quiz_category	= request_var('category', 1); // default to the first category
+
+			// Time limit
+			$quiz_time_limit = null;
+
+			if ($time_limits_enabled)
+			{
+				// Calculate the time limit in seconds
+				$quiz_time_limit = (request_var('time_limit_minutes', 0) * 60) + request_var('time_limit_seconds', 0);
+				$quiz_time_limit = ($quiz_time_limit < 1) ? null : $quiz_time_limit;
+			}
 
 			if( $check_correct && $quiz_name )
 			{
 				$quiz_question = new quiz_question;
-				$quiz_question->insert( $quiz_question->refresh_obtain(), $quiz_name, $quiz_category );
+				$quiz_question->insert($quiz_question->refresh_obtain(), $quiz_name, $quiz_category, $quiz_time_limit);
 
 				trigger_error( sprintf($user->lang['UQM_QUIZ_SUBMITTED'], '<a href="' . append_sid("{$phpbb_root_path}quiz.$phpEx") . '">', '</a>') );
 			}
@@ -181,22 +199,38 @@ switch($mode)
 
 		$s_hidden_fields = build_hidden_fields(array(
 			'question_number'	=> $current_questions,
-			'submit_db'		=> ($enter_answers) ? true : false,
+			'submit_db'			=> ($enter_answers) ? true : false,
 		));
 
 		// Only show the add and remove buttons if within the boundaries
 		$allow_adding 	= ($current_questions < $quiz_configuration->value('qc_maximum_questions')) ? true : false;
 		$allow_removing	= ($current_questions > $quiz_configuration->value('qc_minimum_questions')) ? true : false;
 
-		$template->assign_vars( array(
-			'S_HIDDEN_FIELDS'	=> $s_hidden_fields,
-			'S_SUBMIT_QUIZ_ACTION'	=> append_sid("{$phpbb_root_path}quiz.$phpEx", 'mode=submit'),
+		// Time limits
+		$minutes_dropdown = '';
+		$seconds_dropdown = '';
 
-			'U_UQM_CONFIRM'		=> $enter_answers,
-			'U_UQM_DISPLAY_ADD'	=> ($enter_answers) ? false : $allow_adding,
-			'U_UQM_DISPLAY_REMOVE'	=> ($enter_answers) ? false : $allow_removing,
-			'U_UQM_DISPLAY_MESSAGE'	=> $quiz_message,
-			'U_QUIZ_CATEGORY_SELECT'=> $quiz_configuration->categories(),
+		if ($time_limits_enabled)
+		{
+			// Create the drop down menus
+			$minutes_dropdown = $quiz_configuration->create_time_limit_dropdown('time_limit_minutes', 0, 60);
+			$seconds_dropdown = $quiz_configuration->create_time_limit_dropdown('time_limit_seconds', 0, 59);
+		}
+
+		$template->assign_vars( array(
+			'S_HIDDEN_FIELDS'			=> $s_hidden_fields,
+			'S_SUBMIT_QUIZ_ACTION'		=> append_sid("{$phpbb_root_path}quiz.$phpEx", 'mode=submit'),
+
+			'U_UQM_CONFIRM'				=> $enter_answers,
+			'U_UQM_DISPLAY_ADD'			=> ($enter_answers) ? false : $allow_adding,
+			'U_UQM_DISPLAY_REMOVE'		=> ($enter_answers) ? false : $allow_removing,
+			'U_UQM_DISPLAY_MESSAGE'		=> $quiz_message,
+			'U_QUIZ_CATEGORY_SELECT'	=> $quiz_configuration->categories(),
+
+			// Time limit variables
+			'U_TIME_LIMITS_ENABLED'		=> $time_limits_enabled,
+			'U_MINUTES_SELECTION'		=> $minutes_dropdown,
+			'U_SECONDS_SELECTION'		=> $seconds_dropdown,
 		));
 
 		$template->set_filenames(array(
@@ -329,7 +363,7 @@ switch($mode)
 			'U_QUIZ_NAME'		=> $quiz_information['quiz_name'],
 			'U_QUIZ_TIME_LIMIT'	=> $quiz_information['quiz_time_limit'],
 			'U_REDIRECT_QUIZ_INDEX'	=> append_sid('quiz.' . $phpEx),
-			'U_TIME_LIMIT_ENABLED'	=>  $quiz_configuration->value('qc_enable_time_limits'),
+			'U_TIME_LIMIT_ENABLED'	=> $quiz_configuration->value('qc_enable_time_limits'),
 			'U_POSTED_INFORMATION'	=> sprintf($user->lang['UQM_QUIZ_AUTHOR_DETAILS'], get_username_string('full', $quiz_information['user_id'], $quiz_information['username'], $quiz_information['user_colour']), $user->format_date($quiz_information['quiz_time'])),
 		));
 		
@@ -405,8 +439,11 @@ switch($mode)
 		$quiz_configuration->auth('edit', $auth_params);
 		$display_message = '';
 
+		// The enabled var will be used a few times
+		$time_limits_enabled = ($quiz_configuration->value('qc_enable_time_limits')) ? true : false;
+
 		// Try submitting, but only if everything is in order
-		if( !empty($_POST['submit']) )
+		if (!empty($_POST['submit']))
 		{
 			if( !check_form_key('uqm_edit') )
 			{
@@ -467,8 +504,19 @@ switch($mode)
 
 		// Prepare the quiz for updating in the database by calling the update function in quiz_question
 		$new_quiz_name 	= ($quiz_name != $quiz_information['quiz_name']) ? $quiz_name : null;
+
+		// Time limit
+		$quiz_time_limit = null;
+
+		if ($time_limits_enabled)
+		{
+			// Calculate the time limit in seconds
+			$quiz_time_limit = (request_var('time_limit_minutes', 0) * 60) + request_var('time_limit_seconds', 0);
+			$quiz_time_limit = ($quiz_time_limit < 1) ? null : $quiz_time_limit;
+		}
+
 		$update_quiz = new quiz_question;
-		$update_quiz->update($question_array, $new_quiz_name, $quiz_id, $new_category);
+		$update_quiz->update($question_array, $new_quiz_name, $quiz_id, $new_category, $quiz_time_limit);
 		
 		trigger_error( sprintf($user->lang['UQM_EDIT_QUIZ_SUBMITTED'], '<a href="' . append_sid("{$phpbb_root_path}quiz.$phpEx") . '">', '</a>') );
 		}
@@ -506,11 +554,33 @@ switch($mode)
 			'question_number'	=> sizeof($questions_list),
 		));
 
+		// Time limits
+		$minutes_dropdown = '';
+		$seconds_dropdown = '';
+
+		if ($time_limits_enabled)
+		{
+			$current_time_limit = (int) $quiz_information['quiz_time_limit'];
+			
+			$current_seconds = (int) ($current_time_limit % 60);
+			$current_minutes = (int) (($current_time_limit - $current_seconds) / 60);
+
+			// Create the drop down menus for editing
+			$minutes_dropdown = $quiz_configuration->create_time_limit_dropdown('time_limit_minutes', 0, 60, $current_minutes);
+			$seconds_dropdown = $quiz_configuration->create_time_limit_dropdown('time_limit_seconds', 0, 59, $current_seconds);
+		}
+
 		$template->assign_vars( array(
-			'S_HIDDEN_FIELDS'	=> $s_hidden_fields,
-			'U_QUIZ_NAME' 		=> $quiz_information['quiz_name'],
-			'U_UQM_DISPLAY_MESSAGE'	=> $display_message,
-			'U_QUIZ_CATEGORY_SELECT'=> $quiz_configuration->categories($quiz_information['quiz_category']),
+			'S_HIDDEN_FIELDS'			=> $s_hidden_fields,
+
+			'U_QUIZ_NAME' 				=> $quiz_information['quiz_name'],
+			'U_UQM_DISPLAY_MESSAGE'		=> $display_message,
+			'U_QUIZ_CATEGORY_SELECT'	=> $quiz_configuration->categories($quiz_information['quiz_category']),
+
+			// Time limit variables
+			'U_TIME_LIMITS_ENABLED'		=> $time_limits_enabled,
+			'U_MINUTES_SELECTION'		=> $minutes_dropdown,
+			'U_SECONDS_SELECTION'		=> $seconds_dropdown,
 		));
 
 		$template->set_filenames(array(

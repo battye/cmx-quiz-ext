@@ -101,6 +101,9 @@ $lang = array_merge($lang, array(
 	'UQM_TIME_LIMIT_EXCEEDED'	=> 'You have exceeded the time limit allowed for this quiz.',
 	'UQM_TIME_LIMIT_EXCEEDED_REDIRECT'	=> 'You have exceeded the time limit allowed for this quiz. Click OK to be redirected back to the quiz index page.',
 	'UQM_END_SESSION_ERROR'		=> 'Unable to end the session, as no session for this quiz could be found.',
+	'UQM_ENTER_TIME_LIMIT'		=> 'Enter the time limit for this quiz, or set to 0 for no time limit.',
+	'UQM_TIME_LIMIT_MINUTES'	=> 'minutes',
+	'UQM_TIME_LIMIT_SECONDS'	=> 'seconds',
 ));
 
 ?>

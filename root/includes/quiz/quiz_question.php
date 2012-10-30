@@ -34,7 +34,7 @@ class quiz_question
 		$this->question_id = ($in_question_id >= 0) ? $in_question_id : null;
 	}
 
-	function insert($question_array, $quiz_name, $quiz_category)
+	function insert($question_array, $quiz_name, $quiz_category, $time_limit = null)
 	{
 		global $db, $user;
 
@@ -45,6 +45,7 @@ class quiz_question
 			'user_id'			=> (int) $user->data['user_id'],
 			'username'			=> $user->data['username_clean'],
 			'user_colour'		=> $user->data['user_colour'],
+			'quiz_time_limit'	=> (int) $time_limit,
 		);
 
 		$db->sql_query('INSERT INTO ' . QUIZ_TABLE . ' ' . $db->sql_build_array('INSERT', $quiz_array));
@@ -74,21 +75,30 @@ class quiz_question
 	}
 
 	// To update an array of questions in the database, ie. such as when editing a quiz
-	function update($question_array, $in_quiz_name, $in_quiz_id, $in_quiz_category)
+	function update($question_array, $in_quiz_name, $in_quiz_id, $in_quiz_category, $time_limit = null)
 	{
 		global $db;
 
-		// update the quiz name and quiz category
+		// Update the quiz name, quiz category and time limit
 		$new_name = '';
-		if( !empty($in_quiz_name) )
+		$new_time_limit = '';
+
+		// Quiz name
+		if (!empty($in_quiz_name))
 		{
 			$new_name = "quiz_name = '";
 			$new_name .= $db->sql_escape( utf8_normalize_nfc($in_quiz_name) );
 			$new_name .= "', ";
 		}
 
-		$db->sql_query("UPDATE " . QUIZ_TABLE . " SET $new_name
-				quiz_category = " . (int) $in_quiz_category . " WHERE quiz_id = " . (int) $in_quiz_id); 
+		// Quiz time limit
+		if (!empty($time_limit))
+		{
+			$new_time_limit = 'quiz_time_limit = ' . (int) $time_limit . ', ';
+		}
+
+		$db->sql_query('UPDATE ' . QUIZ_TABLE . ' SET ' . $new_name . $new_time_limit . '
+						quiz_category = ' . (int) $in_quiz_category . ' WHERE quiz_id = ' . (int) $in_quiz_id); 
 		
 		foreach($question_array as $question)
 		{
@@ -174,6 +184,9 @@ class quiz_question
 					AND s.started > (' . ($current_time - (int) $quiz_configuration->value('qc_exclusion_time')) . ')
 				ORDER BY s.started DESC';
 
+		// Note: the exclusion period can be independent of the time limits. For example, even though a user could open 
+		// a quiz and then close it even if there is no time limit for that quiz they should still be punished 
+		// with the exclusion period because they could be doing it just to inflate their statistics records.
 		$result = $db->sql_query($sql);
 		
 		$object_array = array();
