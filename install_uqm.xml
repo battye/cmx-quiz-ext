@@ -8,18 +8,21 @@
 		<license><![CDATA[http://opensource.org/licenses/gpl-license.php GNU General Public License v2]]></license>
 		<title lang="en"><![CDATA[Ultimate Quiz MOD]]></title>
 		<description lang="en"><![CDATA[Ultimate Quiz MOD is a powerful quiz solution for phpBB3 that allows users and administrators to upload and play quizzes.]]></description>
-		<author-notes lang="en"><![CDATA[v2.1.1 - 2nd Alpha (Feb 18)]]></author-notes>
 		<author-group>
 			<author>
 				<username><![CDATA[battye]]></username>
 				<homepage><![CDATA[http://www.cricketmx.com]]></homepage>
 			</author>
+			<author>
+				<username><![CDATA[Dugi]]></username>
+				<homepage><![CDATA[http://www.imgit.org]]></homepage>
+			</author>
 		</author-group>
-		<mod-version>2.1.1</mod-version>
+		<mod-version>2.1.2</mod-version>
 		<installation>
 			<level>easy</level>
-			<time>120</time>
-			<target-version>3.0.8</target-version>
+			<time>320</time>
+			<target-version>3.0.11</target-version>
 		</installation>
 	</header>
 	<action-group>
@@ -30,7 +33,12 @@
 			<file from="root/includes/quiz/quiz_configuration.php" to="includes/quiz/quiz_configuration.php"/>
 			<file from="root/includes/quiz/quiz_question.php" to="includes/quiz/quiz_question.php"/>
 			<file from="root/includes/quiz/quiz_statistics.php" to="includes/quiz/quiz_statistics.php"/>
+			<file from="root/includes/acp/acp_quiz.php" to="includes/acp/acp_quiz.php"/>
+			<file from="root/includes/acp/info/acp_quiz.php" to="includes/acp/info/acp_quiz.php"/>
+			<file from="root/language/en/acp/quiz.php" to="language/en/acp/quiz.php"/>
 			<file from="root/language/en/mods/quiz.php" to="language/en/mods/quiz.php"/>
+			<file from="root/adm/style/acp_quiz.html" to="adm/style/acp_quiz.html"/>
+			<file from="root/adm/style/acp_quiz_category.html" to="adm/style/acp_quiz_category.html"/>
 			<file from="root/styles/prosilver/template/quiz_body.html" to="styles/prosilver/template/quiz_body.html"/>
 			<file from="root/styles/prosilver/template/quiz_edit_body.html" to="styles/prosilver/template/quiz_edit_body.html"/>
 			<file from="root/styles/prosilver/template/quiz_installer_body.html" to="styles/prosilver/template/quiz_installer_body.html"/>
@@ -38,11 +46,8 @@
 			<file from="root/styles/prosilver/template/quiz_results_body.html" to="styles/prosilver/template/quiz_results_body.html"/>
 			<file from="root/styles/prosilver/template/quiz_statistics_body.html" to="styles/prosilver/template/quiz_statistics_body.html"/>
 			<file from="root/styles/prosilver/template/quiz_submit_body.html" to="styles/prosilver/template/quiz_submit_body.html"/>
-			<file from="root/adm/style/acp_quiz.html" to="adm/style/acp_quiz.html"/>
-			<file from="root/adm/style/acp_quiz_category.html" to="adm/style/acp_quiz_category.html"/>
-			<file from="root/includes/acp/acp_quiz.php" to="includes/acp/acp_quiz.php"/>
-			<file from="root/includes/acp/info/acp_quiz.php" to="includes/acp/info/acp_quiz.php"/>
-			<file from="root/language/en/acp/quiz.php" to="language/en/acp/quiz.php"/>
+			<file from="root/styles/prosilver/theme/images/icon_quiz.gif" to="styles/prosilver/theme/images/icon_quiz.gif"/>
+			<file from="root/styles/prosilver/imageset/en/button_quiz_new.gif" to="styles/prosilver/imageset/en/button_quiz_new.gif"/>
 		</copy>
 		<open src="includes/functions.php">
 			<edit>
@@ -52,6 +57,15 @@
 			<edit>
 				<find><![CDATA[		'U_PRIVATEMSGS'			=> append_sid("{$phpbb_root_path}ucp.$phpEx", 'i=pm&amp;folder=inbox'),]]></find>
 				<action type="before-add"><![CDATA[		'U_QUIZ'				=> append_sid("{$phpbb_root_path}quiz.$phpEx"),]]></action>
+			</edit>
+		</open>
+		<open src="includes/acp/acp_styles.php">
+			<edit>
+				<find><![CDATA['button_topic_new']]></find>
+				<inline-edit>
+					<inline-find><![CDATA['button_topic_new']]></inline-find>
+					<inline-action type="after-add"><![CDATA[, 'button_quiz_new']]></inline-action>
+				</inline-edit>
 			</edit>
 		</open>
 		<open src="language/en/acp/common.php">
@@ -64,11 +78,43 @@
 		<open src="styles/prosilver/template/overall_header.html">
 			<edit>
 				<find><![CDATA[				<li class="icon-faq"><a href="{U_FAQ}" title="{L_FAQ_EXPLAIN}">{L_FAQ}</a></li>]]></find>
-				<action type="before-add"><![CDATA[				<li class="icon-faq"><a href="{U_QUIZ}" title="{L_UQM_QUIZ_EXPLAIN}">{L_UQM_QUIZ}</a></li>
+				<action type="before-add"><![CDATA[				<li class="icon-quiz"><a href="{U_QUIZ}" title="{L_UQM_QUIZ_EXPLAIN}">{L_UQM_QUIZ}</a></li>
 ]]></action>
 			</edit>
 		</open>
+		<open src="styles/prosilver/imageset/en/imageset.cfg">
+			<edit>
+				<find><![CDATA[img_button_topic_new = button_topic_new.gif*25*96]]></find>
+				<action type="after-add"><![CDATA[img_button_quiz_new = button_quiz_new.gif*25*90]]></action>
+			</edit>
+		</open>
+		<open src="styles/prosilver/theme/buttons.css">
+			<edit>
+				<find><![CDATA[.post-icon span		{ background: transparent none 0 0 no-repeat; }]]></find>
+				<action type="after-add"><![CDATA[.quiz-icon span		{ background: transparent none 0 0 no-repeat; }]]></action>
+			</edit>
+			<edit>
+				<find><![CDATA[.buttons div.post-icon		{ width: {IMG_BUTTON_TOPIC_NEW_WIDTH}px; height: {IMG_BUTTON_TOPIC_NEW_HEIGHT}px; }]]></find>
+				<action type="after-add"><![CDATA[.buttons div.quiz-icon		{ width: {IMG_BUTTON_QUIZ_NEW_WIDTH}px; height: {IMG_BUTTON_QUIZ_NEW_HEIGHT}px; }]]></action>
+			</edit>
+			<edit>
+				<find><![CDATA[.sitehome, .icon-faq]]></find>
+				<inline-edit>
+					<inline-find><![CDATA[.icon-faq]]></inline-find>
+					<inline-action type="after-add"><![CDATA[, .icon-quiz]]></inline-action>
+				</inline-edit>
+			</edit>
+		</open>
+		<open src="styles/prosilver/theme/colours.css">
+			<edit>
+				<find><![CDATA[.post-icon span		{ background-image: url("{IMG_BUTTON_TOPIC_NEW_SRC}"); }]]></find>
+				<action type="before-add"><![CDATA[.quiz-icon span		{ background-image: url("{IMG_BUTTON_QUIZ_NEW_SRC}"); }]]></action>
+			</edit>
+			<edit>
+				<find><![CDATA[.icon-faq						{ background-image: url("{T_THEME_PATH}/images/icon_faq.gif"); }]]></find>
+				<action type="after-add"><![CDATA[.icon-quiz						{ background-image: url("{T_THEME_PATH}/images/icon_quiz.gif"); }]]></action>
+			</edit>
+		</open>
 		<php-installer><![CDATA[quiz_installer.php]]></php-installer>
-		<diy-instructions lang="en"><![CDATA[Please run quiz_installer.php to create the required database tables. To install the ACP quiz module, go to the ACP -> System -> Module Management -> Administration Control Panel -> and select "Quiz" from the "add module list" on the bottom right.]]></diy-instructions>
 	</action-group>
 </mod>

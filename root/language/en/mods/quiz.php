@@ -104,6 +104,7 @@ $lang = array_merge($lang, array(
 	'UQM_ENTER_TIME_LIMIT'		=> 'Enter the time limit for this quiz, or set to 0 for no time limit.',
 	'UQM_TIME_LIMIT_MINUTES'	=> 'minutes',
 	'UQM_TIME_LIMIT_SECONDS'	=> 'seconds',
+	'UQM_BUTTON_QUIZ_NEW'		=> 'Create a new quiz',
 ));
 
 ?>

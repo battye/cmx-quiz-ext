@@ -1,8 +1,8 @@
 <!-- INCLUDE overall_header.html -->
 
-<!-- IF U_UQM_SUBMIT -->
-<div align="right">
-	<span><a href="{U_UQM_SUBMIT}">{L_SUBMIT_UPPER}</a></span>
+<!-- IF U_UQM_SUBMIT and not S_IS_BOT -->
+<div class="buttons" style="float: right; padding: 3px 0 3px 0;">
+	<div class="quiz-icon" title="{L_UQM_BUTTON_QUIZ_NEW}"><a href="{U_UQM_SUBMIT}"><span></span>{L_UQM_BUTTON_QUIZ_NEW}</a></div>
 </div>
 <!-- ENDIF -->
 
