@@ -3,16 +3,54 @@
 	<h1>{L_ACP_UQM_QUIZ_CATEGORIES}</h1>
 	
 	<fieldset>
-	<legend>{L_ACP_UQM_QUIZ_CONFIGURATION}</legend>
+	<legend>{L_ACP_UQM_QUIZ_CATEGORIES}</legend>
 		<dl>
 			<dt><label>{L_ACP_UQM_CATEGORY_NAME}:</label></dt>
 			<dd><input type="text" name="category_name" value="{U_CATEGORY_VALUE}" /></dd>
 		</dl>
+	</fieldset>
 
-		<p class="quick">
+	<fieldset>
+		<legend>{L_ACP_UQM_CATEGORY_GROUP_REWARDS}</legend>
+
+		<dl>
+			<dt>
+				<label>{L_ACP_UQM_CATEGORY_GROUP_REWARDS}</label><br />
+				<span>{L_ACP_UQM_CATEGORY_GROUP_REWARDS_EXPLAIN}</span>
+			</dt>
+
+			<dd>
+				<input type="radio" name="group_rewards_enabled" value="1" <!-- IF U_GROUP_REWARDS -->checked<!-- ENDIF -->/> {L_YES} &nbsp; 
+				<input type="radio" name="group_rewards_enabled" value="0" <!-- IF U_GROUP_REWARDS != 1-->checked<!-- ENDIF --> /> {L_NO}
+			</dd>	
+		</dl>		
+
+		<dl>
+			<dt>
+				<label>{L_ACP_UQM_CATEGORY_GROUP_REWARDS_PERCENTAGE}</label><br />
+				<span>{L_ACP_UQM_CATEGORY_GROUP_REWARDS_PERCENTAGE_EXPLAIN}</span>
+			</dt>
+			
+			<dd>
+				<input type="text" name="group_rewards_percentage" value="{U_GROUP_PERCENTAGE}" size="3" maxlength="3" /> %
+			</dd>
+		</dl>
+
+		<dl>
+			<dt>
+				<label>{L_ACP_UQM_CATEGORY_GROUP_REWARDS_GROUP}</label><br /> 
+				<span>{L_ACP_UQM_CATEGORY_GROUP_REWARDS_GROUP_EXPLAIN}</span>	
+					<dd>
+						{U_GROUP_LIST}
+					</dd>
+				</dl>		
+			</dd>
+		</dl>
+	</fieldset>
+
+	<p class="quick">
 		{S_FORM_TOKEN}
 		<input class="button1" type="submit" name="submit" value="{L_SUBMIT}" />
-		</p>
-	</fieldset>
+	</p>
 </form>
 <!-- INCLUDE overall_footer.html -->

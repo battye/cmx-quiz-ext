@@ -10,15 +10,19 @@ class acp_quiz
 {
 	var $u_action;
 	
-	function main( $id, $mode )
+	function main($id, $mode)
 	{
 		global $db, $user, $auth, $cache, $template, $config, $phpbb_root_path, $phpbb_admin_path, $phpEx, $u_action;
 
+		// Include quiz functions
 		if( file_exists($phpbb_root_path . 'includes/quiz/quiz.' . $phpEx) )
 		{
 			global $table_prefix;
 			include($phpbb_root_path . 'includes/quiz/quiz.' . $phpEx);
 		}
+
+		// Include usergroup functions
+		include($phpbb_root_path . 'includes/functions_user.' . $phpEx);
 
 		$quiz_configuration = new quiz_configuration;
 		$quiz_configuration->load();
@@ -28,43 +32,74 @@ class acp_quiz
 
 		switch($type)
 		{
+			// Edit a quiz category
 			case 'edit_category':
 				$category_id = request_var('quiz', 0);
+				$edit_category_link = append_sid("{$phpbb_admin_path}index.{$phpEx}", "i=quiz&amp;t=edit_category&amp;quiz=$category_id");
 
 				// Make the database update
 				if( !empty($_POST['submit']) )
 				{
 					if( !check_form_key('uqm_category_edit') )
 					{
-						// Form is invalid, link back to the edit page
-						$link_to_edit_page = append_sid("{$phpbb_admin_path}index.$phpEx?i=quiz&amp;t=edit_category&amp;quiz=$category_id");
-						trigger_error($user->lang['ACP_UQM_QUIZ_FORM_INVALID'] . adm_back_link($link_to_edit_page));
+						trigger_error($user->lang['ACP_UQM_QUIZ_FORM_INVALID'] . adm_back_link($edit_category_link));
 					}
 
-					// Now do the actual update, fix up the category name first.
-					$category = utf8_normalize_nfc( $db->sql_escape(request_var('category_name', '')) );
+					// Values to update, which we'll pass by reference to the validation checking function.
+					$category_name = request_var('category_name', '');
+					$group_rewards_destination_group_id = null;
+					$group_rewards_percentage = null;
 
-					$sql = "UPDATE " . QUIZ_CATEGORIES_TABLE . "
-						SET quiz_category_name = '$category'
-						WHERE quiz_category_id = $category_id";
+					// Run through all of the validations. This will display an error page if there are failed validations.
+					$this->run_category_validations(
+						$category_name, 
+						$group_rewards_percentage, 
+						$group_rewards_destination_group_id, 
+						$edit_category_link,
+						$category_id
+					);
+
+					// Perform an update query for the current quiz category
+					$category_array = array(
+						'quiz_category_name' 							=> utf8_normalize_nfc($category_name),
+						'quiz_category_destination_group_percentage'	=> $group_rewards_percentage,
+						'quiz_category_destination_group_id'			=> $group_rewards_destination_group_id
+					);
+
+					$sql = 'UPDATE ' . QUIZ_CATEGORIES_TABLE . '
+							SET ' . $db->sql_build_array('UPDATE', $category_array) . '
+							WHERE quiz_category_id = ' . $category_id;
+
 					$db->sql_query($sql);
 
-					$message = sprintf($user->lang['ACP_UQM_CATEGORY_UPDATED'], $category) . adm_back_link($this->u_action);
-					trigger_error($message);					
+					// Updated successfully
+					trigger_error(
+						sprintf($user->lang['ACP_UQM_CATEGORY_UPDATED'], $category_name) . adm_back_link($this->u_action)
+					);					
 				}
 
 				// Deal with the form key
 				add_form_key('uqm_category_edit');
 
-				$sql = 'SELECT quiz_category_name FROM ' . QUIZ_CATEGORIES_TABLE . '
-					WHERE quiz_category_id = ' . $category_id;
-				$result = $db->sql_query($sql);
-				$category_name = $db->sql_fetchfield('quiz_category_name');
+				$sql = 'SELECT * 
+						FROM ' . QUIZ_CATEGORIES_TABLE . '
+						WHERE quiz_category_id = ' . $category_id;
+				
+				$result	= $db->sql_query_limit($sql, 1);
+				$row	= $db->sql_fetchrow($result);
+
+				$category_name 			= $row['quiz_category_name'];
+				$destination_group		= $row['quiz_category_destination_group_id'];
+				$group_percentage		= $row['quiz_category_destination_group_percentage'];
+
 				$db->sql_freeresult($result);
 
 				$template->assign_vars( array(
-					'S_FORM_ACTION'		=> append_sid("{$phpbb_admin_path}index.$phpEx", 'i=quiz&amp;t=edit_category&quiz=' . $category_id),
-					'U_CATEGORY_VALUE'	=> $category_name,
+					'S_FORM_ACTION'			=> $edit_category_link,
+					'U_CATEGORY_VALUE'		=> $category_name,
+					'U_GROUP_REWARDS'		=> (isset($destination_group) && isset($group_percentage)),
+					'U_GROUP_PERCENTAGE'	=> $group_percentage,
+					'U_GROUP_LIST'			=> $this->create_usergroup_list($destination_group)
 				));
 				
 				$this->tpl_name = 'acp_quiz_category';
@@ -72,29 +107,58 @@ class acp_quiz
 
 				break;
 
+			// Add a new quiz category
 			case 'add_category':
+				$add_category_link = append_sid("{$phpbb_admin_path}index.{$phpEx}", "i=quiz&amp;t=add_category");
+
+				// Insert a new quiz category into the database
 				if( !empty($_POST['submit']) )
 				{
 					if( !check_form_key('uqm_category') )
 					{
-						trigger_error($user->lang['ACP_UQM_QUIZ_FORM_INVALID'] . adm_back_link(append_sid("{$phpbb_admin_path}index.$phpEx?i=quiz&amp;t=add_category")));
+						trigger_error($user->lang['ACP_UQM_QUIZ_FORM_INVALID'] . adm_back_link($add_category_link));
 					}
 
-					$category = utf8_normalize_nfc( $db->sql_escape(request_var('category_name', '')) );
-					$sql = "INSERT INTO " . QUIZ_CATEGORIES_TABLE . "
-						(quiz_category_name) VALUES ('$category')";
+					// The values we'll be inserting. We'll pass these by reference to the validation function
+					// so that they can be assigned values or updated if necessary. For example, there is no need to 
+					// update the group rewards variables unless the admin has enabled that for this category.
+					$category_name = request_var('category_name', '');
+					$group_rewards_destination_group_id = null;
+					$group_rewards_percentage = null;
+
+					// Run through all of the validations. This will display an error page if there are failed validations.
+					$this->run_category_validations(
+						$category_name, 
+						$group_rewards_percentage, 
+						$group_rewards_destination_group_id, 
+						$add_category_link
+					);
+
+					// Get ready to perform the query...
+					$category_array = array(
+						'quiz_category_name' 							=> utf8_normalize_nfc($category_name),
+						'quiz_category_destination_group_percentage'	=> $group_rewards_percentage,
+						'quiz_category_destination_group_id'			=> $group_rewards_destination_group_id
+					);
+
+					$sql = 'INSERT INTO ' . QUIZ_CATEGORIES_TABLE . ' ' . $db->sql_build_array('INSERT', $category_array);
 					$db->sql_query($sql);
 
-					$message = sprintf($user->lang['ACP_UQM_CATEGORY_ADDED'], $category) . adm_back_link($this->u_action);
-					trigger_error($message);
+					// Successfully inserted message
+					trigger_error(
+						sprintf($user->lang['ACP_UQM_CATEGORY_ADDED'], $category_name) . adm_back_link($this->u_action)
+					);
 				}
 
-				// Deal with the form key
+				// Prepare the page... but first deal with the form key
 				add_form_key('uqm_category');
 
 				$template->assign_vars( array(
-					'S_FORM_ACTION'		=> append_sid("{$phpbb_admin_path}index.$phpEx", 'i=quiz&amp;t=add_category'),
-					'U_CATEGORY_VALUE'	=> '',
+					'S_FORM_ACTION'			=> $add_category_link,
+					'U_CATEGORY_VALUE'		=> '',
+					'U_GROUP_REWARDS'		=> false,
+					'U_GROUP_PERCENTAGE'	=> '',
+					'U_GROUP_LIST'			=> $this->create_usergroup_list()
 				));
 				
 				$this->tpl_name = 'acp_quiz_category';
@@ -116,6 +180,7 @@ class acp_quiz
 					$result = $db->sql_query($sql);
 
 					$question_id_list = array();
+
 					while( $row = $db->sql_fetchrow($result) )
 					{
 						$question_id_list[] = $row['question_id']; 
@@ -125,15 +190,22 @@ class acp_quiz
 
 					$delete_sql = array();
 					$delete_sql[] = 'DELETE FROM ' . QUIZ_TABLE . ' 
-							 WHERE quiz_category = ' . $category_id;
-					$delete_sql[] = 'DELETE FROM ' . QUIZ_QUESTIONS_TABLE . '
-							 WHERE ' . $db->sql_in_set('question_id', $question_id_list);
-					$delete_sql[] = 'DELETE FROM ' . QUIZ_STATISTICS_TABLE . '
-							 WHERE ' . $db->sql_in_set('quiz_question_id', $question_id_list);
+						WHERE quiz_category = ' . $category_id;
+
+					// If there were no quizzes in the category, we don't have any questions or statistics to delete
+					if (sizeof($question_id_list) > 0)
+					{
+						$delete_sql[] = 'DELETE FROM ' . QUIZ_QUESTIONS_TABLE . '
+							WHERE ' . $db->sql_in_set('question_id', $question_id_list);
+
+						$delete_sql[] = 'DELETE FROM ' . QUIZ_STATISTICS_TABLE . '
+							WHERE ' . $db->sql_in_set('quiz_question_id', $question_id_list);
+					}
+
 					$delete_sql[] = 'DELETE FROM ' . QUIZ_CATEGORIES_TABLE . '
-							 WHERE quiz_category_id = ' . $category_id;
+						WHERE quiz_category_id = ' . $category_id;
 					
-					foreach($delete_sql as $query)
+					foreach ($delete_sql as $query)
 					{
 						$db->sql_query($query);
 					}
@@ -149,10 +221,10 @@ class acp_quiz
 			default:
 
 			// If the configuration values have been updated, then do some updating...
-			if( !empty($_POST['submit']) )
+			if (!empty($_POST['submit']))
 			{
 				$configuration_list = $quiz_configuration->config_array();
-				foreach($configuration_list as $name)
+				foreach ($configuration_list as $name)
 				{
 					// Check the type of setting, and use that as a parameter
 					$type = ($quiz_configuration->value($name, true) == 'radio') ? 0 : '';
@@ -209,6 +281,128 @@ class acp_quiz
 			));
 		}
 	}
-}
 
+	// Do all of the category validation checks (required for both add and edit category pages). Pass most by reference.
+	function run_category_validations(&$category_name, &$group_rewards_percentage, &$group_rewards_destination_group_id, $return_link, $category_id = null)
+	{
+		global $user;
+
+		// Category name validation (required field). We pass the category id in because if the name hasn't changed
+		// we don't want it finding a conflict with itself.
+		$category_validation = $this->category_validation($category_name, $category_id);
+
+		if ($category_validation !== true)
+		{
+			// Inform the user that validation failed
+			trigger_error($user->lang[$category_validation] . adm_back_link($return_link), E_USER_WARNING);
+		}
+
+		// Look at group rewards (these are optional for categories)
+		$group_rewards_enabled = request_var('group_rewards_enabled', false);
+
+		if ($group_rewards_enabled)
+		{
+			$group_rewards_destination_group_id = request_var('group_rewards_group_id', 0);
+			$group_rewards_percentage = request_var('group_rewards_percentage', -1);
+
+			// Make sure the user supplied values pass validation
+			$group_rewards_validation = $this->group_rewards_validation(
+				$group_rewards_percentage, 
+				$group_rewards_destination_group_id
+			);
+
+			if ($group_rewards_validation !== true)
+			{
+				// Inform the user that validation failed
+				trigger_error($user->lang[$group_rewards_validation] . adm_back_link($return_link), E_USER_WARNING);
+			}
+		}
+	}
+
+	// Check that the category passes validation
+	function category_validation($category_name, $category_id = null)
+	{
+		global $db;
+
+		// Category name is empty
+		if (strlen($category_name) < 1)
+		{
+			return 'ACP_UQM_CATEGORY_NAME_VALIDATE';
+		}
+
+		else
+		{
+			$filtered_category_name = $db->sql_escape(utf8_normalize_nfc($category_name));
+
+			$sql = 'SELECT COUNT(quiz_category_id) AS count_names FROM ' . QUIZ_CATEGORIES_TABLE . "
+					WHERE quiz_category_name = '$filtered_category_name'";
+			$sql .= (isset($category_id)) ? ' AND quiz_category_id != ' . (int) $category_id : '';
+		
+			$result = $db->sql_query($sql);
+			$category_count = $db->sql_fetchfield('count_names');
+		
+			// Category name already exists
+			if ($category_count > 0)
+			{
+				return 'ACP_UQM_CATEGORY_NAME_VALIDATE';
+			}
+		}
+
+		// Passed validation, everything is fine
+		return true;
+	}
+
+	// Check that the percentage is a valid number and the usergroup exists above id 7
+	function group_rewards_validation($percentage, $group_id)
+	{
+		global $db;
+
+		$passed = false;
+
+		$percentage_valid = ($percentage >= 0 && $percentage <= 100) ? true : false;
+
+		// Percentage is invalid
+		if (!$percentage_valid)
+		{
+			return 'ACP_UQM_CATEGORY_GROUP_REWARDS_PERCENTAGE_VALIDATE';
+		}
+
+		$usergroup_exists = ($group_id > 7 && (get_group_name($group_id) != '')) ? true : false;
+
+		// Usergroup is invalid
+		if (!$usergroup_exists)
+		{
+			return 'ACP_UQM_CATEGORY_GROUP_REWARDS_GROUP_VALIDATE';
+		}
+
+		// Everything is fine
+		return true;
+	}
+
+	// Make the dropdown menu of usergroups that a user could be moved to
+	function create_usergroup_list($default_group_id = null)
+	{
+		global $db, $user;
+
+		$sql = 'SELECT group_id, group_name 
+				FROM ' . GROUPS_TABLE . '
+				WHERE group_id > 7';
+
+		$result = $db->sql_query($sql);
+
+		$select = '<select name="group_rewards_group_id">';
+		$select .= '	<option value="0">' . $user->lang['ACP_UQM_CATEGORY_GROUP_REWARDS_GROUP_SELECT'] . '</option>';
+
+		// Iterate through the groups
+		while( $row = $db->sql_fetchrow($result) )
+		{
+			$selected = ($default_group_id != null && $row['group_id'] == (int) $default_group_id) ? ' selected="selected"' : '';
+			$select .= '	<option value="' . $row['group_id'] . '"' . $selected . '>' . $row['group_name'] . '</option>';
+		}
+
+		$select .= '</select>';
+
+		return $select;
+	}
+}
 ?>

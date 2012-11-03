@@ -26,7 +26,17 @@ $lang = array_merge($lang, array(
 	'ACP_UQM_DELETE_CATEGORY'		=> 'Delete category',
 	'ACP_UQM_ADD_CATEGORY'			=> '%sAdd new category%s',
 
-	'ACP_UQM_CATEGORY_NAME'			=> 'Enter the category name',
+	'ACP_UQM_CATEGORY_NAME'									=> 'Enter the category name',
+	'ACP_UQM_CATEGORY_NAME_VALIDATE'						=> 'Quiz category names cannot be empty or match an existing quiz category name.',
+	'ACP_UQM_CATEGORY_GROUP_REWARDS'						=> 'Group rewards',
+	'ACP_UQM_CATEGORY_GROUP_REWARDS_EXPLAIN'				=> 'If a user completes each of the quizzes (at a given point in time) to at least the percentage specified, they can be moved to a specified usergroup. Do you want to enable this feature for this category?',
+	'ACP_UQM_CATEGORY_GROUP_REWARDS_GROUP' 					=> 'Destination usergroup',
+	'ACP_UQM_CATEGORY_GROUP_REWARDS_GROUP_SELECT'			=> 'Select a usergroup...',
+	'ACP_UQM_CATEGORY_GROUP_REWARDS_GROUP_EXPLAIN' 			=> 'This is the usergroup that successful users will be moved to.',
+	'ACP_UQM_CATEGORY_GROUP_REWARDS_GROUP_VALIDATE' 		=> 'The usergroup must already exist and must not be a default usergroup.',
+	'ACP_UQM_CATEGORY_GROUP_REWARDS_PERCENTAGE'				=> 'Minimum percentage',
+	'ACP_UQM_CATEGORY_GROUP_REWARDS_PERCENTAGE_EXPLAIN'		=> 'The user must achieve this percentage as a minimum in each of the quizzes in the category.',
+	'ACP_UQM_CATEGORY_GROUP_REWARDS_PERCENTAGE_VALIDATE'	=> 'The minimum percentage must be a whole number between 0 and 100.',
 	'ACP_UQM_CATEGORY_ADDED'		=> 'The category <strong>%s</strong> has been successfully added.',
 	'ACP_UQM_CATEGORY_UPDATED'		=> 'The category <strong>%s</strong> has been successfully updated.',
 
