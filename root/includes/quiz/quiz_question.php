@@ -270,7 +270,8 @@ class quiz_question
 			// This is the final time the user can submit
 			$last_finish_time_allowed = $started_time + $quiz_time_limit;
 
-			if ($current_time > $last_finish_time_allowed)
+			// If that time is exceeded (and this quiz doesn't have a time limit of 0), show the error.
+			if ($quiz_time_limit > 0 && $current_time > $last_finish_time_allowed)
 			{
 				// It has expired
 				trigger_error('UQM_TIME_LIMIT_EXCEEDED');

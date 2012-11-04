@@ -390,13 +390,13 @@ class acp_quiz
 
 		$result = $db->sql_query($sql);
 
-		$select = '<select name="group_rewards_group_id">';
+		$select = (isset($default_group_id)) ? '<select name="group_rewards_group_id">' : '<select name="group_rewards_group_id" disabled="true">';
 		$select .= '	<option value="0">' . $user->lang['ACP_UQM_CATEGORY_GROUP_REWARDS_GROUP_SELECT'] . '</option>';
 
 		// Iterate through the groups
-		while( $row = $db->sql_fetchrow($result) )
+		while ($row = $db->sql_fetchrow($result))
 		{
-			$selected = ($default_group_id != null && $row['group_id'] == (int) $default_group_id) ? ' selected="selected"' : '';
+			$selected = (isset($default_group_id) && $row['group_id'] == (int) $default_group_id) ? ' selected="selected"' : '';
 			$select .= '	<option value="' . $row['group_id'] . '"' . $selected . '>' . $row['group_name'] . '</option>';
 		}
 

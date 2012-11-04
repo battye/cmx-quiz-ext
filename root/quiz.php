@@ -308,25 +308,29 @@ switch($mode)
 
 			$result_percentage = $quiz_configuration->determine_percentage($user_correct_answers, $user_incorrect_answers);
 
-			$template->assign_vars( array(
-				'U_QUIZ_RESULTS'	=> sprintf($user->lang['UQM_RESULTS_FOR_QUIZ'], $quiz_information['quiz_name']),
-				'U_QUIZ_SUMMARY'	=> sprintf($user->lang['UQM_RESULTS_SUMMARY'], $user_correct_answers, $user_incorrect_answers, $result_percentage),
-				'U_SHOW_ANSWERS'	=> $quiz_configuration->value('qc_show_answers'),
-				'U_RETURN_TO_INDEX'	=> sprintf($user->lang['UQM_RESULTS_RETURN_TO_INDEX'], '<a href="' . append_sid('quiz.'.$phpEx) . '">', '</a>'),
-			));
-
-			$template->set_filenames(array(
-				'body' => 'quiz_results_body.html')
-			);
-
 			// End the quiz session - do this before updating anything else
 			$quiz_session_id = $play->update_quiz_session($quiz_id);
 
 			// Update the statistics, as the SQL array's are still stored in the static variable
 			$question->obtain_result_data(null, null, null, $quiz_session_id);
 
+			// Handle the group rewards
+			$group_rewards = $quiz_configuration->group_rewards($quiz_id);
+
 			// Finish the results by checking if cash compatibility is enabled
 			$quiz_configuration->cash($user_correct_answers, $user_incorrect_answers);
+
+			$template->assign_vars( array(
+				'U_QUIZ_RESULTS'	=> sprintf($user->lang['UQM_RESULTS_FOR_QUIZ'], $quiz_information['quiz_name']),
+				'U_QUIZ_SUMMARY'	=> sprintf($user->lang['UQM_RESULTS_SUMMARY'], $user_correct_answers, $user_incorrect_answers, $result_percentage),
+				'U_SHOW_ANSWERS'	=> $quiz_configuration->value('qc_show_answers'),
+				'U_GROUP_REWARDS'	=> (isset($group_rewards)) ? $group_rewards : false,
+				'U_RETURN_TO_INDEX'	=> sprintf($user->lang['UQM_RESULTS_RETURN_TO_INDEX'], '<a href="' . append_sid('quiz.'.$phpEx) . '">', '</a>'),
+			));
+
+			$template->set_filenames(array(
+				'body' => 'quiz_results_body.html')
+			);
 
 			page_footer();
 		}

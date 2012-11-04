@@ -103,6 +103,153 @@ class quiz_configuration
 		}
 	}
 
+	// Group rewards: if the admin has specified, then if a user completes all quizzes in a category to a certain
+	// accuracy level they will be moved into a usergroup. If they are moved into a usergroup, a message will be returned.
+	function group_rewards($quiz_id)
+	{
+		global $db, $user, $phpbb_root_path, $phpEx;
+
+		// Include this for the usergroup functions
+		include($phpbb_root_path . 'includes/functions_user.' . $phpEx);
+
+		// Get the basic quiz and category details
+		$sql = 'SELECT c.* 
+				FROM ' . QUIZ_CATEGORIES_TABLE . ' c, ' . QUIZ_TABLE . ' q
+				WHERE q.quiz_category = c.quiz_category_id
+					AND q.quiz_id = ' . (int) $quiz_id;
+
+		$result	= $db->sql_query($sql);
+		$row 	= $db->sql_fetchrow($result);
+
+		// Get the data
+		$quiz_category_id							= $row['quiz_category_id'];
+		$quiz_category_destination_group_id 		= $row['quiz_category_destination_group_id'];
+		$quiz_category_destination_group_percentage	= $row['quiz_category_destination_group_percentage'];
+
+		$db->sql_freeresult($result);
+
+		// If either are null, then there is no group rewards for this category
+		if (isset($quiz_category_destination_group_id) && isset($quiz_category_destination_group_percentage))
+		{
+			// The first thing to do is see if the user is a member of the usergroup. Because if they are, there is no
+			// point continuing...
+			if (group_memberships($quiz_category_destination_group_id, $user->data['user_id'], true))
+			{
+				return;
+			}
+
+			// Get the statistics data
+			$sql = 'SELECT s.*, q.question_quiz
+					FROM ' . QUIZ_STATISTICS_TABLE . ' s, ' . QUIZ_QUESTIONS_TABLE . ' q, ' . QUIZ_TABLE . ' t
+					WHERE s.quiz_user = ' . $user->data['user_id'] . '
+						AND q.question_id = s.quiz_question_id
+						AND t.quiz_id = q.question_quiz
+						AND t.quiz_category = ' . $quiz_category_id . '
+					ORDER BY q.question_quiz';
+
+			$result = $db->sql_query($sql);
+
+			// Raw statistics information for a user
+			$statistics_array = array();
+			
+			// Keep a record of the quiz ids played by the user
+			$quiz_id_array	= array();
+			$quiz_scores	= array();
+
+			while ($row = $db->sql_fetchrow($result))
+			{
+				$is_correct = false;
+
+				if ($row['quiz_is_correct'] > 0)
+				{
+					$is_correct = true;
+				}
+
+				$statistics_array[$row['quiz_session_id']][] = array(
+					'quiz_id'			=> $row['question_quiz'],
+					'question_id'		=> $row['quiz_question_id'],
+					'quiz_session_id'	=> $row['quiz_session_id'],
+					'is_correct'		=> (bool) $is_correct
+				);
+
+				// Add the played quiz id to the array if it's not already there
+				if (!in_array($row['question_quiz'], $quiz_id_array))
+				{
+					$quiz_id_array[] = $row['question_quiz'];
+
+					// We'll start this array now. Essentially, it will keep a record of the top percentage
+					// a user has for that quiz.
+					$quiz_scores[$row['question_quiz']] = 0;
+				}
+			}			
+
+			// First check that the user has completed all quizzes in the category (by doing a NOT IN).
+			$sql = 'SELECT COUNT(quiz_id) AS unplayed
+					FROM ' . QUIZ_TABLE . '
+					WHERE ' . $db->sql_in_set('quiz_id', $quiz_id_array, true) . '
+					AND quiz_category = ' . $quiz_category_id;
+
+			$result = $db->sql_query($sql);
+
+			// We will only proceed beyond this point if the user has played all of the quizzes in the category
+			if ($db->sql_fetchfield('unplayed') > 0)
+			{
+				return;
+			}
+
+			// The unique keys are also a list of session ids for that user
+			// We just need to see if they scored the minimum percentage for each quiz.
+			$sessions_played = array_keys($statistics_array);		
+
+			// Now check the results; each $quiz_played is a quiz_id
+			foreach ($sessions_played as $quiz_session)
+			{
+				$correct_answers 	= 0;
+				$incorrect_answers 	= 0;
+				$session_quiz_id 	= 0;
+
+				// Loop through each question in the statistics array for this session
+				foreach ($statistics_array[$quiz_session] as $statistics_item)
+				{
+					$session_quiz_id = ($session_quiz_id == 0) ? $statistics_item['quiz_id'] : $session_quiz_id;
+
+					if ($statistics_item['is_correct'])
+					{
+						// The user got this question correct
+						$correct_answers++;
+					}
+
+					else
+					{
+						// The user got this question incorrect
+						$incorrect_answers++;
+					}
+				}
+
+				// The percentage the user got for this quiz in this session
+				$session_percentage = 100 * $correct_answers / ($correct_answers + $incorrect_answers);
+			
+				// If this is the highest percentage so far for a user in this quiz, we'll update this variable.
+				$quiz_scores[$session_quiz_id] = ($session_percentage > $quiz_scores[$session_quiz_id]) ? $session_percentage : $quiz_scores[$session_quiz_id];
+			}
+
+			// Let's look at all of the top quiz scores by this user, now that we have them
+			foreach ($quiz_scores as $score)
+			{
+				if ($score < $quiz_category_destination_group_percentage)
+				{
+					// Any score below the threshold means there is no point continuing
+					return;
+				}
+			}
+
+			// If we've reached this point, then we can move the user to the usergroup!
+			group_user_add($quiz_category_destination_group_id, $user->data['user_id']);
+
+			return sprintf($user->lang['UQM_RESULTS_GROUP_REWARD'], $quiz_category_destination_group_percentage, get_group_name($quiz_category_destination_group_id));
+		}
+	}
+
 	// Return the configuration value for "$setting"
 	function value($setting, $type = false)
 	{

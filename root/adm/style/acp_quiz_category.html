@@ -1,5 +1,13 @@
 <!-- INCLUDE overall_header.html -->  
-<form method="post" action="{S_FORM_ACTION}">
+<script>
+	function toggle_group_rewards(disabled_setting)
+	{
+		document.getElementById('quiz_category_form').group_rewards_group_id.disabled = disabled_setting;
+		document.getElementById('quiz_category_form').group_rewards_percentage.disabled = disabled_setting;
+	}
+</script>
+
+<form id="quiz_category_form" method="post" action="{S_FORM_ACTION}">
 	<h1>{L_ACP_UQM_QUIZ_CATEGORIES}</h1>
 	
 	<fieldset>
@@ -20,8 +28,8 @@
 			</dt>
 
 			<dd>
-				<input type="radio" name="group_rewards_enabled" value="1" <!-- IF U_GROUP_REWARDS -->checked<!-- ENDIF -->/> {L_YES} &nbsp; 
-				<input type="radio" name="group_rewards_enabled" value="0" <!-- IF U_GROUP_REWARDS != 1-->checked<!-- ENDIF --> /> {L_NO}
+				<input type="radio" name="group_rewards_enabled" value="1" onclick="toggle_group_rewards(false)" <!-- IF U_GROUP_REWARDS -->checked<!-- ENDIF -->/> {L_YES} &nbsp; 
+				<input type="radio" name="group_rewards_enabled" value="0" onclick="toggle_group_rewards(true)" <!-- IF U_GROUP_REWARDS != 1-->checked<!-- ENDIF --> /> {L_NO}
 			</dd>	
 		</dl>		
 
@@ -32,7 +40,7 @@
 			</dt>
 			
 			<dd>
-				<input type="text" name="group_rewards_percentage" value="{U_GROUP_PERCENTAGE}" size="3" maxlength="3" /> %
+				<input type="text" name="group_rewards_percentage" value="{U_GROUP_PERCENTAGE}" size="3" maxlength="3" <!-- IF U_GROUP_REWARDS != 1 -->disabled="false"<!-- ENDIF --> /> %
 			</dd>
 		</dl>
 

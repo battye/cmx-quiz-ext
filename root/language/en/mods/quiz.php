@@ -61,6 +61,7 @@ $lang = array_merge($lang, array(
 	'UQM_QUIZ_CASH_LOST'			=> 'You have lost <strong>%s</strong> points from playing this quiz.',
 	'UQM_RESULTS_FOR_QUIZ'			=> 'Results for %s',
 	'UQM_RESULTS_SUMMARY'			=> 'You correctly answered <strong>%d</strong> and incorrectly answered <strong>%d</strong> questions, a result of <strong>%d&#37;</strong>.',
+	'UQM_RESULTS_GROUP_REWARD'		=> 'For achieving at least <strong>%d&#37;</strong> in each of the quizzes in this category, you have been moved to the <strong>%s</strong> usergroup.',
 	'UQM_RESULTS_RETURN_TO_INDEX'		=> 'Click %shere%s to return to the quiz index.',
 
 	'UQM_QUIZ_STATISTICS'			=> 'Quiz statistics',
