@@ -26,6 +26,8 @@ class quiz_configuration
 			'qc_admin_submit_only',			// only administrators are allowed to submit quizzes
 			'qc_enable_time_limits', 		// are time limits on or off
 			'qc_exclusion_time',			// exclusion time (seconds) if a user violates the time limit
+			'qc_quizzes_on_index',			// how many recent quizzes from each category should be shown on the index
+			'qc_quizzes_per_page',			// how many quizzes per page in the category view
 			'qc_cash_enabled',				// enable cash functionality
 			'qc_cash_column', 				// associated column in the users table
 			'qc_cash_correct',				// cash gained for a correct answer
@@ -45,7 +47,10 @@ class quiz_configuration
 			'qc_enable_time_limits'		=> $this->generate_config_array('qc_enable_time_limits', 'radio'),
 			'qc_exclusion_time'			=> $this->generate_config_array('qc_exclusion_time', 'input'),
 
-			'qc_cash_enabled'			=> $this->generate_config_array('qc_cash_enabled', 'input'),
+			'qc_quizzes_on_index'		=> $this->generate_config_array('qc_quizzes_on_index', 'input'),
+			'qc_quizzes_per_page'		=> $this->generate_config_array('qc_quizzes_per_page', 'input'),
+
+			'qc_cash_enabled'			=> $this->generate_config_array('qc_cash_enabled', 'radio'),
 			'qc_cash_column'			=> $this->generate_config_array('qc_cash_column', 'input'),
 
 			'qc_cash_correct'			=> $this->generate_config_array('qc_cash_correct', 'input'), 
@@ -292,8 +297,10 @@ class quiz_configuration
 	{
 		$follow = true;
 
-		if( 	($in_questions + $alteration) < $this->value('qc_minimum_questions') ||
-			($in_questions + $alteration) > $this->value('qc_maximum_questions') )
+		$less_than_minimum		= (($in_questions + $alteration) < $this->value('qc_minimum_questions'));
+		$greater_than_maximum	= (($in_questions + $alteration) > $this->value('qc_maximum_questions'));
+
+		if ($less_than_minimum || $greater_than_maximum)
 		{
 			$follow = false;
 		}

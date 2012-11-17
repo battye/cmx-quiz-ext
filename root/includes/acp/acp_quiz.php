@@ -260,13 +260,13 @@ class acp_quiz
 			// Get the configuration values
 			$configuration_list = $quiz_configuration->config_array();
 
-			foreach($configuration_list as $name)
+			foreach ($configuration_list as $name)
 			{
-				$lang_name 	= $user->lang['ACP_UQM_CONFIG_DEFINITIONS'][$name];
+				$lang_name 		= $user->lang['ACP_UQM_CONFIG_DEFINITIONS'][$name];
 				$lang_explain 	= $user->lang['ACP_UQM_CONFIG_DEFINITIONS'][$name . '_explain'];
 
 				$template->assign_block_vars('configuration_row', array(
-					'CONFIGURATION_LANG'		=> $lang_name,
+					'CONFIGURATION_LANG'			=> $lang_name,
 					'CONFIGURATION_LANG_EXPLAIN'	=> $lang_explain,
 
 					'CONFIGURATION_NAME'	=> $name,
