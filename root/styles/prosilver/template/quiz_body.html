@@ -12,11 +12,16 @@
 		<table class="table1" cellspacing="1">
 			<thead>
 				<tr>
-					<th width="100%" align="left" colspan="4"><a href="{category_row.U_CATEGORY_LINK}">{category_row.U_CATEGORY_NAME}</a></th>
+					<th width="100%" align="left" colspan="4"><!-- IF category_row.U_VIRTUAL_CATEGORY -->{category_row.U_CATEGORY_NAME}<!-- ELSE --><a href="{category_row.U_CATEGORY_LINK}">{category_row.U_CATEGORY_NAME}</a><!-- ENDIF --></th>
 				</tr>
 			</thead>
 
 			<tbody>
+			<!-- IF category_row.U_CATEGORY_NO_QUIZZES -->
+				<tr class="bg1">
+					<td width="100%" align="center">{L_UQM_CATEGORY_NO_QUIZZES}</td>
+				</tr>
+			<!-- ELSE -->
 			<!-- BEGIN quiz_row -->
 				<tr class="bg1">
 					<td width="35%"><a href="{category_row.quiz_row.U_QUIZ_LINK}">{category_row.quiz_row.U_QUIZ_NAME}</a></td>
@@ -25,10 +30,16 @@
 					<td width="20%">{category_row.quiz_row.U_QUIZ_INFO}</td>
 				</tr>
 			<!-- END quiz_row -->
+			<!-- ENDIF -->
 			</tbody>
 		</table>
 	<span class="corners-bottom"><span></span></span></div>
 </div>
 <!-- END category_row -->
 
+<!-- IF U_PAGINATION -->
+<ul class="linklist">
+	<li class="rightside pagination"><a href="#" onclick="jumpto(); return false;" title="{L_JUMP_TO_PAGE}">{U_PAGE_NUMBER}</a> &bull; <span>{U_PAGINATION}</span></li>
+</ul>
+<!-- ENDIF -->
 <!-- INCLUDE overall_footer.html -->

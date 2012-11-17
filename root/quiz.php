@@ -595,82 +595,239 @@ switch($mode)
 
 		break;
 
+	// Quiz index page and category view
 	default:
 		page_header($user->lang['UQM_QUIZ']);
 		
-		$category_id 	= request_var('c', 0);
-		$category_and	= '';
+		$category_id	= request_var('c', 0);
+		$pagination		= null;
+		$page			= null;
 
-		if( $category_id )
+		// Category view
+		if ($category_id)
 		{
-			$category_and = 'AND c.quiz_category_id = ' . (int) $category_id;
-		}
+			$start = request_var('start', 0);
+			$quizzes_per_page = $quiz_configuration->value('qc_quizzes_per_page');
 
-		$sql = 'SELECT q.*, c.* FROM ' . QUIZ_TABLE . ' q, ' . QUIZ_CATEGORIES_TABLE . ' c
-			WHERE q.quiz_category = c.quiz_category_id ' . $category_and . '
-			ORDER BY c.quiz_category_name ASC, q.quiz_id DESC';
-		$result = $db->sql_query($sql);
+			$category_data = initialise_quiz_category($quizzes_per_page, $start, $category_id);
 
-		$category_id_list	= array();
-		$category_name_list	= array();
-		$quiz_list		= array();
-
-		while( $row = $db->sql_fetchrow($result) )
-		{
-			$category_id_list[] 				= $row['quiz_category_id'];
-			$category_name_list[$row['quiz_category_id']]	= $row['quiz_category_name'];
-			$quiz_list[$row['quiz_category_id']][]		= $row; 
-		}
-
-		foreach( array_unique($category_id_list) as $cat_id )
-		{
-			$template->assign_block_vars('category_row', array(
-				'U_CATEGORY_NAME'		=> $category_name_list[$cat_id],
-				'U_CATEGORY_LINK'		=> append_sid('quiz.'.$phpEx, 'c='.$cat_id),
-			));
-
-			// iterate through each category
-			foreach( $quiz_list[$cat_id] as $quiz_row )
+			// Display the quizzes
+			foreach ($category_data as $category)
 			{
-				$quiz_statistics = new quiz_statistics;
-				$auth_params = array(
-					'quiz_information'	=> $quiz_row,
-					'user_id'		=> (int) $user->data['user_id'],
-					'played_quiz'		=> $quiz_statistics->has_user_played_quiz($quiz_row['quiz_id'], $user->data['user_id']),
-					'administrator'		=> $auth->acl_get('a_'),
-					'submit_setting'	=> $quiz_configuration->value('qc_admin_submit_only'),
-					'return_value'		=> true,
+				display_category($category);
+
+				foreach ($category['quizzes'] as $quiz)
+				{
+					display_quiz($quiz);
+				}
+			}
+
+			// Determine the number of quizzes in this category for pagination. And some other pagination stuff.
+			$sql = 'SELECT COUNT(quiz_id) AS quizzes_in_this_category
+					FROM ' . QUIZ_TABLE . '
+					WHERE quiz_category = ' . (int) $category_id;
+			$result = $db->sql_query($sql);
+
+			$quizzes_in_this_category = $db->sql_fetchfield('quizzes_in_this_category');
+
+			// Validate the page number
+			if ($start < 0 || $start >= $quizzes_in_this_category)
+			{
+				trigger_error('UQM_CATEGORY_NO_QUIZZES_FOUND');
+			}
+
+			// Initialise phpBB3's pagination functions
+			$page_url 	= append_sid($phpbb_root_path . 'quiz.' . $phpEx, 'c=' . $category_id);
+			$pagination	= generate_pagination($page_url, $quizzes_in_this_category, $quizzes_per_page, $start);
+			$page 		= on_page($quizzes_in_this_category, $quizzes_per_page, $start);
+		}
+
+		// Quiz index view
+		else
+		{
+			// The maximum number of quizzes we want to show for a category
+			$quizzes_on_index = $quiz_configuration->value('qc_quizzes_on_index');
+
+			$category_data = initialise_quiz_category($quizzes_on_index, 0);
+
+			// Iterate through the quizzes in the category data to get the latest additions, to display at the top
+			// of the quiz index page.
+			$all_quizzes = array();
+
+			foreach ($category_data as $category)
+			{
+				foreach ($category['quizzes'] as $quiz)
+				{
+					// TODO: Exclude this quiz if it doesn't have the correct permissions
+					$all_quizzes[] = $quiz;
+				}
+			}
+
+			// Sort the quizzes by latest time using the callback, then take only what we need
+			usort($all_quizzes, 'sort_quiz_by_time');
+			$recent_quizzes = array_slice($all_quizzes, 0, $quizzes_on_index);
+
+			// Add the recent quizzes to the index as if it was a category. 
+			// No need to do this if there are no quizzes yet though.
+			if (sizeof($recent_quizzes) > 0)
+			{
+				// We set this as a virtual category so we know to treat it differently
+				$recent_category = array(
+					'virtual_category'	=> true,
+					'category_name' 	=> $user->lang['UQM_RECENTLY_ADDED_QUIZZES'],
+					'category_link'		=> '',
+					'quizzes'			=> $recent_quizzes
 				);
 
-				$template->assign_block_vars('category_row.quiz_row', array(
-					'U_QUIZ_NAME'			=> $quiz_row['quiz_name'],
-					'U_QUIZ_LINK'			=> append_sid("{$phpbb_root_path}quiz.$phpEx", 'mode=play&amp;q=' . $quiz_row['quiz_id']),
-					'U_QUIZ_AUTHOR'			=> sprintf($user->lang['UQM_QUIZ_SUBMITTED_BY'], get_username_string('full', $quiz_row['user_id'], $quiz_row['username'], $quiz_row['user_colour'])),	
-					'U_QUIZ_DATE'			=> $user->format_date($quiz_row['quiz_time']),
-					'U_QUIZ_INFO'			=> $quiz_configuration->determine_quiz_information($auth_params),
-				));				
+				// Shift all of the categories up one, so that the recent quizzes appear first...
+				for ($i = sizeof($category_data); $i > 0; $i--)
+				{
+					$category_data[$i] = $category_data[$i - 1];
+					$category_data[$i - 1] = null;
+				} 
+
+				// And add recent categories at the beginning, now that the first element has been freed.
+				$category_data[0] = $recent_category;
+			}
+
+			// Now display everything on the index
+			foreach ($category_data as $category)
+			{
+				// First the category gets displayed
+				display_category($category);
+
+				foreach ($category['quizzes'] as $quiz)
+				{
+					// And then we add each quiz (or at least the latest few!) to the category for viewing on the index
+					display_quiz($quiz);
+				}
 			}
 		}
-
-		$db->sql_freeresult($result);
-
-		$submit_auth_params = array(
-			'administrator' => $auth->acl_get('a_'), 
-			'submit_setting' => $quiz_configuration->value('qc_admin_submit_only'), 
-			'return_value' => true,
-		);
-
+		
+		// Templating is independent of category or index
 		$template->assign_vars( array(
 			'L_SUBMIT_UPPER'		=> strtoupper($user->lang['UQM_SUBMIT_QUIZ']),
 
 			'U_UQM_SUBMIT'			=> ($quiz_configuration->auth('submit', $submit_auth_params)) ? append_sid("{$phpbb_root_path}quiz.$phpEx", 'mode=submit') : '',
 			'U_UQM_STATS'			=> append_sid("{$phpbb_root_path}quiz.$phpEx", 'mode=statistics'),
-		));
+
+			'U_PAGINATION'			=> $pagination,
+			'U_PAGE_NUMBER'			=> $page
+		)); 
 
 		$template->set_filenames(array(
 			'body' => 'quiz_body.html')
 		);
 
 		page_footer();
+}
+
+function display_quiz($quiz)
+{
+	global $template, $user;
+
+	$template->assign_block_vars('category_row.quiz_row', array(
+		'U_QUIZ_NAME'			=> $quiz['quiz_name'],
+		'U_QUIZ_LINK'			=> $quiz['quiz_link'],
+		'U_QUIZ_AUTHOR'			=> $quiz['quiz_author'],	
+		'U_QUIZ_DATE'			=> $user->format_date($quiz['quiz_time']),
+		'U_QUIZ_INFO'			=> $quiz['quiz_info']
+	));
+}
+
+function display_category($category)
+{
+	global $template;
+
+	$template->assign_block_vars('category_row', array(
+		'U_VIRTUAL_CATEGORY'	=> $category['virtual_category'],
+		'U_CATEGORY_NAME'		=> $category['category_name'],
+		'U_CATEGORY_LINK'		=> $category['category_link'],
+		'U_CATEGORY_NO_QUIZZES'	=> (empty($category['quizzes']) || sizeof($category['quizzes']) == 0)
+	));
+}
+
+// Get all of the quiz and category data we need for the index page or the category view page
+function initialise_quiz_category($limit, $start, $category_id = null)
+{
+	global $auth, $db, $user, $phpEx, $phpbb_root_path, $quiz_configuration;
+
+	$category_data = array();
+
+	$category_sql = 'SELECT * FROM ' . QUIZ_CATEGORIES_TABLE . ' 
+					' . ((isset($category_id)) ? 'WHERE quiz_category_id = ' . (int) $category_id : '');
+	$category_result = $db->sql_query($category_sql);
+
+	// Get each of the categories
+	while ($category_row = $db->sql_fetchrow($category_result))
+	{
+		$quizzes_data = array();
+
+		$quizzes_sql = 'SELECT * FROM ' . QUIZ_TABLE . '
+						WHERE quiz_category = ' . $category_row['quiz_category_id'] . ' 
+						' . ((isset($category_id)) ? 'AND quiz_category = ' . (int) $category_id : '') . '
+						ORDER BY quiz_time DESC';
+		$quizzes_result = $db->sql_query_limit($quizzes_sql, $limit, $start);
+
+		// Get each of the top x quizzes from the category
+		while ($quizzes_row = $db->sql_fetchrow($quizzes_result))
+		{
+			$quiz_statistics = new quiz_statistics;
+
+			// Some key quiz details
+			$played_quiz = $quiz_statistics->has_user_played_quiz($quizzes_row['quiz_id'], $user->data['user_id']);
+			$link = append_sid($phpbb_root_path . 'quiz.' . $phpEx, 'mode=play&amp;q=' . $quizzes_row['quiz_id']);
+			$author = sprintf($user->lang['UQM_QUIZ_SUBMITTED_BY'], get_username_string(
+					'full', 
+					$quizzes_row['user_id'], 
+					$quizzes_row['username'], 
+					$quizzes_row['user_colour']
+				)
+			);
+
+			$auth_params = array(
+				'quiz_information'	=> $quizzes_row,
+				'user_id'			=> (int) $user->data['user_id'],
+				'played_quiz' 		=> $played_quiz,
+				'administrator'		=> $auth->acl_get('a_'),
+				'submit_setting'	=> $quiz_configuration->value('qc_admin_submit_only'),
+				'return_value'		=> true,
+			);
+
+			$quizzes_data[] = array(
+				'quiz_id'			=> $quizzes_row['quiz_id'],
+				'quiz_name' 		=> $quizzes_row['quiz_name'],
+				'quiz_time'			=> $quizzes_row['quiz_time'],
+				'quiz_link'			=> $link,
+				'quiz_author'		=> $author,
+				'quiz_info'			=> $quiz_configuration->determine_quiz_information($auth_params)
+			);
+		}
+
+		$category_link = append_sid($phpbb_root_path . 'quiz.' . $phpEx, 'c=' . $category_row['quiz_category_id']);
+
+		// Construct category name, category description, x category quizzes array
+		$category_data[] = array(
+			'virtual_category'	=> false,
+			'category_name' 	=> $category_row['quiz_category_name'],
+			'category_link'		=> $category_link,
+			'quizzes'			=> $quizzes_data
+		);
+	}
+
+	return $category_data;
+}
+
+// A callback for usort, we'll sort by time but default to id if two quizzes have the same time.
+function sort_quiz_by_time($quiz_one, $quiz_two)
+{
+	$sort_order = $quiz_two['quiz_time'] - $quiz_one['quiz_time'];
+
+	if ($sort_order == 0)
+	{
+		$sort_order = $quiz_two['quiz_id'] - $quiz_one['quiz_id'];
+	}
+	
+	return $sort_order;
 }
 ?>

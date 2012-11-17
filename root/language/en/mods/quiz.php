@@ -26,6 +26,9 @@ $lang = array_merge($lang, array(
 
 	'UQM_SUBMIT_QUIZ'			=> 'Submit quiz',
 	'UQM_STATS_QUIZ'			=> 'Statistics',
+	'UQM_RECENTLY_ADDED_QUIZZES'	=> 'Recently added quizzes',
+	'UQM_CATEGORY_NO_QUIZZES'		=> 'There are no quizzes in this category.',
+	'UQM_CATEGORY_NO_QUIZZES_FOUND'	=> 'No quizzes found on this page number.',
 
 	'UQM_SUBMIT_NO_PERMISSIONS'		=> 'Only administrators are permitted to submit quizzes.',
 	'UQM_ENTER_QUESTION'			=> 'Enter the question',
