@@ -27,6 +27,9 @@ $lang = array_merge($lang, array(
 	'ACP_UQM_ADD_CATEGORY'			=> '%sAdd new category%s',
 
 	'ACP_UQM_CATEGORY_NAME'									=> 'Enter the category name',
+	'ACP_UQM_CATEGORY_NAME_EXPLAIN'							=> 'You must enter a name for this category.',
+	'ACP_UQM_CATEGORY_DESCRIPTION'							=> 'Enter the category description',
+	'ACP_UQM_CATEGORY_DESCRIPTION_EXPLAIN'					=> 'Leave blank for no description.',
 	'ACP_UQM_CATEGORY_NAME_VALIDATE'						=> 'Quiz category names cannot be empty or match an existing quiz category name.',
 	'ACP_UQM_CATEGORY_GROUP_REWARDS'						=> 'Group rewards',
 	'ACP_UQM_CATEGORY_GROUP_REWARDS_EXPLAIN'				=> 'If a user completes each of the quizzes (at a given point in time) to at least the percentage specified, they can be moved to a specified usergroup. Do you want to enable this feature for this category?',

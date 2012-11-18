@@ -17,9 +17,14 @@
 			</thead>
 
 			<tbody>
+			<!-- IF category_row.U_CATEGORY_DESCRIPTION -->
+				<tr class="bg3">
+					<td width="100%" colspan="4" align="left">{category_row.U_CATEGORY_DESCRIPTION}</td>
+				</tr>
+			<!-- ENDIF -->
 			<!-- IF category_row.U_CATEGORY_NO_QUIZZES -->
 				<tr class="bg1">
-					<td width="100%" align="center">{L_UQM_CATEGORY_NO_QUIZZES}</td>
+					<td width="100%" colspan="4" align="center">{L_UQM_CATEGORY_NO_QUIZZES}</td>
 				</tr>
 			<!-- ELSE -->
 			<!-- BEGIN quiz_row -->
@@ -30,6 +35,11 @@
 					<td width="20%">{category_row.quiz_row.U_QUIZ_INFO}</td>
 				</tr>
 			<!-- END quiz_row -->
+			<!-- ENDIF -->
+			<!-- IF U_INDEX_VIEW and not category_row.U_VIRTUAL_CATEGORY and not category_row.U_CATEGORY_NO_QUIZZES -->
+				<tr class="bg3">
+					<td width="100%" colspan="4" align="left">{category_row.U_CATEGORY_VIEW_ALL}</td>
+				</tr>
 			<!-- ENDIF -->
 			</tbody>
 		</table>

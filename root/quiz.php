@@ -598,6 +598,8 @@ switch($mode)
 	// Quiz index page and category view
 	default:
 		page_header($user->lang['UQM_QUIZ']);
+
+		$index_view 	= true;
 		
 		$category_id	= request_var('c', 0);
 		$pagination		= null;
@@ -606,6 +608,8 @@ switch($mode)
 		// Category view
 		if ($category_id)
 		{
+			$index_view = false;
+
 			$start = request_var('start', 0);
 			$quizzes_per_page = $quiz_configuration->value('qc_quizzes_per_page');
 
@@ -645,6 +649,8 @@ switch($mode)
 		// Quiz index view
 		else
 		{
+			$index_view = true;
+
 			// The maximum number of quizzes we want to show for a category
 			$quizzes_on_index = $quiz_configuration->value('qc_quizzes_on_index');
 
@@ -673,10 +679,11 @@ switch($mode)
 			{
 				// We set this as a virtual category so we know to treat it differently
 				$recent_category = array(
-					'virtual_category'	=> true,
-					'category_name' 	=> $user->lang['UQM_RECENTLY_ADDED_QUIZZES'],
-					'category_link'		=> '',
-					'quizzes'			=> $recent_quizzes
+					'virtual_category'		=> true,
+					'category_name' 		=> $user->lang['UQM_RECENTLY_ADDED_QUIZZES'],
+					'category_link'			=> '',
+					'category_description'	=> '',
+					'quizzes'				=> $recent_quizzes
 				);
 
 				// Shift all of the categories up one, so that the recent quizzes appear first...
@@ -712,7 +719,9 @@ switch($mode)
 			'U_UQM_STATS'			=> append_sid("{$phpbb_root_path}quiz.$phpEx", 'mode=statistics'),
 
 			'U_PAGINATION'			=> $pagination,
-			'U_PAGE_NUMBER'			=> $page
+			'U_PAGE_NUMBER'			=> $page,
+
+			'U_INDEX_VIEW'			=> $index_view,
 		)); 
 
 		$template->set_filenames(array(
@@ -722,6 +731,7 @@ switch($mode)
 		page_footer();
 }
 
+// Take in a single quiz (information, not questions) and produce the templating variables for it.
 function display_quiz($quiz)
 {
 	global $template, $user;
@@ -735,15 +745,18 @@ function display_quiz($quiz)
 	));
 }
 
+// Take in a single category and produce the templating variables for it.
 function display_category($category)
 {
-	global $template;
+	global $template, $user;
 
 	$template->assign_block_vars('category_row', array(
-		'U_VIRTUAL_CATEGORY'	=> $category['virtual_category'],
-		'U_CATEGORY_NAME'		=> $category['category_name'],
-		'U_CATEGORY_LINK'		=> $category['category_link'],
-		'U_CATEGORY_NO_QUIZZES'	=> (empty($category['quizzes']) || sizeof($category['quizzes']) == 0)
+		'U_VIRTUAL_CATEGORY'		=> $category['virtual_category'],
+		'U_CATEGORY_NAME'			=> $category['category_name'],
+		'U_CATEGORY_LINK'			=> $category['category_link'],
+		'U_CATEGORY_DESCRIPTION'	=> $category['category_description'],
+		'U_CATEGORY_NO_QUIZZES'		=> (empty($category['quizzes']) || sizeof($category['quizzes']) == 0),
+		'U_CATEGORY_VIEW_ALL'		=> sprintf($user->lang['UQM_CATEGORY_VIEW_ALL'], '<a href="' . $category['category_link'] . '">', '</a>')
 	));
 }
 
@@ -808,10 +821,11 @@ function initialise_quiz_category($limit, $start, $category_id = null)
 
 		// Construct category name, category description, x category quizzes array
 		$category_data[] = array(
-			'virtual_category'	=> false,
-			'category_name' 	=> $category_row['quiz_category_name'],
-			'category_link'		=> $category_link,
-			'quizzes'			=> $quizzes_data
+			'virtual_category'		=> false,
+			'category_name' 		=> $category_row['quiz_category_name'],
+			'category_description'	=> $category_row['quiz_category_description'],
+			'category_link'			=> $category_link,
+			'quizzes'				=> $quizzes_data
 		);
 	}
 

@@ -13,8 +13,14 @@
 	<fieldset>
 	<legend>{L_ACP_UQM_QUIZ_CATEGORIES}</legend>
 		<dl>
-			<dt><label>{L_ACP_UQM_CATEGORY_NAME}:</label></dt>
+			<dt><label>{L_ACP_UQM_CATEGORY_NAME}:</label>
+			<br /><span>{L_ACP_UQM_CATEGORY_NAME_EXPLAIN}</span></dt>
 			<dd><input type="text" name="category_name" value="{U_CATEGORY_VALUE}" /></dd>
+		</dl>
+		<dl>
+			<dt><label>{L_ACP_UQM_CATEGORY_DESCRIPTION}:</label>
+			<br /><span>{L_ACP_UQM_CATEGORY_DESCRIPTION_EXPLAIN}</span></dt>
+			<dd><input type="text" name="category_description" value="{U_CATEGORY_DESCRIPTION}" maxlength="255" /></dd>
 		</dl>
 	</fieldset>
 

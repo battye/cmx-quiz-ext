@@ -59,9 +59,13 @@ class acp_quiz
 						$category_id
 					);
 
+					// Category description
+					$category_description = request_var('category_description', '');
+
 					// Perform an update query for the current quiz category
 					$category_array = array(
 						'quiz_category_name' 							=> utf8_normalize_nfc($category_name),
+						'quiz_category_description'						=> utf8_normalize_nfc($category_description),
 						'quiz_category_destination_group_percentage'	=> $group_rewards_percentage,
 						'quiz_category_destination_group_id'			=> $group_rewards_destination_group_id
 					);
@@ -89,17 +93,19 @@ class acp_quiz
 				$row	= $db->sql_fetchrow($result);
 
 				$category_name 			= $row['quiz_category_name'];
+				$category_description	= $row['quiz_category_description'];
 				$destination_group		= $row['quiz_category_destination_group_id'];
 				$group_percentage		= $row['quiz_category_destination_group_percentage'];
 
 				$db->sql_freeresult($result);
 
 				$template->assign_vars( array(
-					'S_FORM_ACTION'			=> $edit_category_link,
-					'U_CATEGORY_VALUE'		=> $category_name,
-					'U_GROUP_REWARDS'		=> (isset($destination_group) && isset($group_percentage)),
-					'U_GROUP_PERCENTAGE'	=> $group_percentage,
-					'U_GROUP_LIST'			=> $this->create_usergroup_list($destination_group)
+					'S_FORM_ACTION'				=> $edit_category_link,
+					'U_CATEGORY_VALUE'			=> $category_name,
+					'U_CATEGORY_DESCRIPTION'	=> $category_description,
+					'U_GROUP_REWARDS'			=> (isset($destination_group) && isset($group_percentage)),
+					'U_GROUP_PERCENTAGE'		=> $group_percentage,
+					'U_GROUP_LIST'				=> $this->create_usergroup_list($destination_group)
 				));
 				
 				$this->tpl_name = 'acp_quiz_category';
@@ -134,9 +140,13 @@ class acp_quiz
 						$add_category_link
 					);
 
+					// Category description
+					$category_description = request_var('category_description', '');
+
 					// Get ready to perform the query...
 					$category_array = array(
 						'quiz_category_name' 							=> utf8_normalize_nfc($category_name),
+						'quiz_category_description'						=> utf8_normalize_nfc($category_description),
 						'quiz_category_destination_group_percentage'	=> $group_rewards_percentage,
 						'quiz_category_destination_group_id'			=> $group_rewards_destination_group_id
 					);
