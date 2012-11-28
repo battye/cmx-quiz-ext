@@ -61,6 +61,14 @@
 			</dd>
 		</dl>
 	</fieldset>
+    
+    <fieldset>
+    	<legend>{L_ACP_UQM_CATEGORY_GROUP_PERMISSIONS}</legend>
+        <dl>
+        	<dt><label for="permitted_groups">{L_ACP_UQM_CATEGORY_GROUP_PERMISSIONS_GROUP}:</label><br /><span>{L_ACP_UQM_CATEGORY_GROUP_PERMISSIONS_GROUP_EXPLAIN}</span></dt>
+            <dd><select name="permitted_groups[]" id="permitted_groups" multiple="multiple">{U_MULTI_GROUP_LIST}</select></dd>
+        </dl>
+    </fieldset>
 
 	<p class="quick">
 		{S_FORM_TOKEN}

@@ -42,6 +42,8 @@ $lang = array_merge($lang, array(
 	'ACP_UQM_CATEGORY_GROUP_REWARDS_PERCENTAGE_VALIDATE'	=> 'The minimum percentage must be a whole number between 0 and 100.',
 	'ACP_UQM_CATEGORY_ADDED'		=> 'The category <strong>%s</strong> has been successfully added.',
 	'ACP_UQM_CATEGORY_UPDATED'		=> 'The category <strong>%s</strong> has been successfully updated.',
+	'ACP_UQM_CATEGORY_GROUP_PERMISSIONS_GROUP'				=> 'Permitted groups',
+	'ACP_UQM_CATEGORY_GROUP_PERMISSIONS_GROUP_EXPLAIN'		=> 'Select the groups that should be able to play quizzes within this category.',
 
 	'ACP_UQM_DELETE_TITLE'			=> 'Delete category',
 	'ACP_UQM_DELETE_TITLE_CONFIRM'	=> 'Are you sure you wish to delete this category and all of the quizzes inside it?',

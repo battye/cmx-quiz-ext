@@ -63,7 +63,7 @@ class quiz_configuration
 	{
 		global $config;
 
-		return array('value' => $config[$configuration_name], 'type' => $input_type);
+		return array('value' => (isset($config[$configuration_name])) ? $config[$configuration_name] : '', 'type' => $input_type);
 	}
 
 	// Return this list of config values

@@ -711,6 +711,12 @@ switch($mode)
 			}
 		}
 		
+		$submit_auth_params = array(
+		 	'administrator' => $auth->acl_get('a_'), 
+			'submit_setting' => $quiz_configuration->value('qc_admin_submit_only'), 
+			'return_value' => true,
+		);
+		
 		// Templating is independent of category or index
 		$template->assign_vars( array(
 			'L_SUBMIT_UPPER'		=> strtoupper($user->lang['UQM_SUBMIT_QUIZ']),

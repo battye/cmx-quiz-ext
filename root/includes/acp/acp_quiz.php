@@ -49,6 +49,10 @@ class acp_quiz
 					$category_name = request_var('category_name', '');
 					$group_rewards_destination_group_id = null;
 					$group_rewards_percentage = null;
+					
+					// Group permissions
+					$group_permissions_groups = request_var('permitted_groups', array(0));
+					$group_permissions_groups = implode(', ', $group_permissions_groups);
 
 					// Run through all of the validations. This will display an error page if there are failed validations.
 					$this->run_category_validations(
@@ -67,7 +71,8 @@ class acp_quiz
 						'quiz_category_name' 							=> utf8_normalize_nfc($category_name),
 						'quiz_category_description'						=> utf8_normalize_nfc($category_description),
 						'quiz_category_destination_group_percentage'	=> $group_rewards_percentage,
-						'quiz_category_destination_group_id'			=> $group_rewards_destination_group_id
+						'quiz_category_destination_group_id'			=> $group_rewards_destination_group_id,
+						'quiz_category_group_ids'						=> $group_permissions_groups // Group permissions
 					);
 
 					$sql = 'UPDATE ' . QUIZ_CATEGORIES_TABLE . '
@@ -96,6 +101,7 @@ class acp_quiz
 				$category_description	= $row['quiz_category_description'];
 				$destination_group		= $row['quiz_category_destination_group_id'];
 				$group_percentage		= $row['quiz_category_destination_group_percentage'];
+				$permitted_groups		= explode(', ', $row['quiz_category_group_ids']); // Group permissions
 
 				$db->sql_freeresult($result);
 
@@ -105,7 +111,8 @@ class acp_quiz
 					'U_CATEGORY_DESCRIPTION'	=> $category_description,
 					'U_GROUP_REWARDS'			=> (isset($destination_group) && isset($group_percentage)),
 					'U_GROUP_PERCENTAGE'		=> $group_percentage,
-					'U_GROUP_LIST'				=> $this->create_usergroup_list($destination_group)
+					'U_GROUP_LIST'				=> $this->create_usergroup_list($destination_group),
+					'U_MULTI_GROUP_LIST'		=> $this->multi_group_select_options($permitted_groups) // Group permissions
 				));
 				
 				$this->tpl_name = 'acp_quiz_category';
@@ -131,6 +138,10 @@ class acp_quiz
 					$category_name = request_var('category_name', '');
 					$group_rewards_destination_group_id = null;
 					$group_rewards_percentage = null;
+					
+					// Group permissions
+					$group_permissions_groups = request_var('permitted_groups', array(0));
+					$group_permissions_groups = implode(', ', $group_permissions_groups);
 
 					// Run through all of the validations. This will display an error page if there are failed validations.
 					$this->run_category_validations(
@@ -148,7 +159,8 @@ class acp_quiz
 						'quiz_category_name' 							=> utf8_normalize_nfc($category_name),
 						'quiz_category_description'						=> utf8_normalize_nfc($category_description),
 						'quiz_category_destination_group_percentage'	=> $group_rewards_percentage,
-						'quiz_category_destination_group_id'			=> $group_rewards_destination_group_id
+						'quiz_category_destination_group_id'			=> $group_rewards_destination_group_id,
+						'quiz_category_group_ids'						=> $group_permissions_groups // Group permissions
 					);
 
 					$sql = 'INSERT INTO ' . QUIZ_CATEGORIES_TABLE . ' ' . $db->sql_build_array('INSERT', $category_array);
@@ -168,7 +180,8 @@ class acp_quiz
 					'U_CATEGORY_VALUE'		=> '',
 					'U_GROUP_REWARDS'		=> false,
 					'U_GROUP_PERCENTAGE'	=> '',
-					'U_GROUP_LIST'			=> $this->create_usergroup_list()
+					'U_GROUP_LIST'			=> $this->create_usergroup_list(),
+					'U_MULTI_GROUP_LIST'	=> $this->multi_group_select_options(array(2)) // Group permissions
 				));
 				
 				$this->tpl_name = 'acp_quiz_category';
@@ -413,6 +426,34 @@ class acp_quiz
 		$select .= '</select>';
 
 		return $select;
+	}
+	
+	// Create a list of <select> options with all available groups.
+	// This function keeps multiple groups selected if an array with ids is provided.
+	function multi_group_select_options($group_ids)
+	{
+		global $db, $user;
+		
+		$group_ids 	= (is_array($group_ids)) ? $group_ids : array($group_ids);
+		$sql_where 	= ($user->data['user_type'] == USER_FOUNDER) ? '' : 'WHERE group_founder_manage = 0';
+		
+		$sql = 'SELECT group_id, group_name, group_type
+			FROM ' . GROUPS_TABLE . " 
+			$sql_where 
+			ORDER BY group_type DESC, group_name ASC";
+		$result = $db->sql_query($sql);
+	
+		$s_group_options = '';
+		
+		while ($row = $db->sql_fetchrow($result))
+		{			
+			$selected = (is_array($group_ids) && in_array($row['group_id'], $group_ids)) ? ' selected="selected"' : '';
+			$s_group_name = ($row['group_type'] == GROUP_SPECIAL) ? $user->lang['G_' . $row['group_name']] : $row['group_name'];
+			$s_group_options .= '<option'  . (($row['group_type'] == GROUP_SPECIAL) ? ' class="sep"' : '') . ' value="' . $row['group_id'] . '"' . $selected . '>' . $s_group_name . '</option>';
+		}
+		$db->sql_freeresult($result);
+	
+		return $s_group_options;
 	}
 }
 ?>

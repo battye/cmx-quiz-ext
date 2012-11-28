@@ -241,6 +241,7 @@ class quiz_question
 			'quiz_id'	=> (int) $quiz_id,
 			'user_id'	=> (int) $user->data['user_id'],
 			'started'	=> time(),
+			'ended'		=> null
 		);
 
 		$db->sql_query('INSERT INTO ' . QUIZ_SESSIONS_TABLE . ' ' . $db->sql_build_array('INSERT', $quiz_session_array));
