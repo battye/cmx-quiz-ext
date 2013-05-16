@@ -79,6 +79,10 @@ switch($mode)
 			$quiz_name		= request_var('quiz_name', '');		
 			$quiz_category	= request_var('category', 1); // default to the first category
 
+			// Make sure this is definitely a category the user can access. If it's not, a message will be returned 
+			// to the user
+			$category_is_valid = in_array($quiz_category, $quiz_configuration->qc_user_viewable_categories);
+
 			// Time limit
 			$quiz_time_limit = null;
 
@@ -89,7 +93,7 @@ switch($mode)
 				$quiz_time_limit = ($quiz_time_limit < 1) ? null : $quiz_time_limit;
 			}
 
-			if( $check_correct && $quiz_name )
+			if ($check_correct && $quiz_name && $category_is_valid)
 			{
 				$quiz_question = new quiz_question;
 				$quiz_question->insert($quiz_question->refresh_obtain(), $quiz_name, $quiz_category, $quiz_time_limit);
@@ -102,7 +106,9 @@ switch($mode)
 				// If the user has missed an answer, bring the page back up with a message
 				$alter_question	= true;
 				$enter_answers	= true;
-				$quiz_message	= $user->lang['UQM_ENTER_ALL_CORRECT'];
+
+				// Either select all answers, a quiz name or select another category - will be the message displayed
+				$quiz_message	= ($category_is_valid) ? $user->lang['UQM_ENTER_ALL_CORRECT'] : $user->lang['UQM_ENTER_VALID_CATEGORY'];
 			}
 		}
 
@@ -225,7 +231,7 @@ switch($mode)
 			'U_UQM_DISPLAY_ADD'			=> ($enter_answers) ? false : $allow_adding,
 			'U_UQM_DISPLAY_REMOVE'		=> ($enter_answers) ? false : $allow_removing,
 			'U_UQM_DISPLAY_MESSAGE'		=> $quiz_message,
-			'U_QUIZ_CATEGORY_SELECT'	=> $quiz_configuration->categories(),
+			'U_QUIZ_CATEGORY_SELECT'	=> $quiz_configuration->categories(0, true),
 
 			// Time limit variables
 			'U_TIME_LIMITS_ENABLED'		=> $time_limits_enabled,
@@ -248,10 +254,19 @@ switch($mode)
 
 		$quiz_information = $quiz_configuration->determine_quiz_core($quiz_id);
 
-		if( !$quiz_information['quiz_id'] || !$quiz_id )
+		if (!$quiz_information['quiz_id'] || !$quiz_id)
 		{
 			trigger_error('UQM_EDIT_NO_QUIZ');
 		}
+
+		// Determine if the user viewing the play page is allowed to
+		$auth_params = array(
+			'quiz_information'	=> $quiz_information,
+			'return_value'		=> false,
+		);
+
+		$quiz_configuration->auth('play', $auth_params);
+
 
 		$play = new quiz_question;
 		$play_quiz = $play->play($quiz_id); // Get the array of quiz question objects for this quiz
@@ -399,7 +414,7 @@ switch($mode)
 			// Determine if the user viewing this page is allowed to
 			$auth_params = array(
 				'quiz_information'	=> $quiz_information,
-				'user_id'		=> (int) $user->data['user_id'],
+				'user_id'			=> (int) $user->data['user_id'],
 				'played_quiz'		=> $quiz_statistics->has_user_played_quiz($quiz_id, $user->data['user_id']),
 				'administrator'		=> $auth->acl_get('a_'),
 				'return_value'		=> false,
@@ -768,13 +783,41 @@ function display_category($category)
 
 // Get all of the quiz and category data we need for the index page or the category view page
 function initialise_quiz_category($limit, $start, $category_id = null)
-{
+{	
 	global $auth, $db, $user, $phpEx, $phpbb_root_path, $quiz_configuration;
 
-	$category_data = array();
+	// Determine if an individual category is being sought
+	$individual_category_selected = isset($category_id);
 
-	$category_sql = 'SELECT * FROM ' . QUIZ_CATEGORIES_TABLE . ' 
-					' . ((isset($category_id)) ? 'WHERE quiz_category_id = ' . (int) $category_id : '');
+	// Just a quick check to make sure we have something to display. If the user has no viewable categories, no point
+	// continuing on!
+	ensure_viewable_categories_exist();
+
+	$category_data = array();
+	$category_sql = 'SELECT * FROM ' . QUIZ_CATEGORIES_TABLE;
+
+	if ($individual_category_selected)
+	{
+		if (!in_array($category_id, $quiz_configuration->qc_user_viewable_categories))
+		{
+			// Don't go any further if the user can't view this category
+			trigger_error('UQM_CATEGORY_NO_PERMISSION');
+		}
+
+		else
+		{
+			// Getting one category
+			$category_sql .= ' WHERE quiz_category_id = ' . (int) $category_id;
+		}
+	}
+
+	else
+	{
+		// Getting all categories for the index... need to filter properly though
+		$category_sql .= ' WHERE ' . $db->sql_in_set('quiz_category_id', $quiz_configuration->qc_user_viewable_categories);
+	}
+
+	// If we get to this point, hopefully we have some categories to display!
 	$category_result = $db->sql_query($category_sql);
 
 	// Get each of the categories
@@ -784,7 +827,7 @@ function initialise_quiz_category($limit, $start, $category_id = null)
 
 		$quizzes_sql = 'SELECT * FROM ' . QUIZ_TABLE . '
 						WHERE quiz_category = ' . $category_row['quiz_category_id'] . ' 
-						' . ((isset($category_id)) ? 'AND quiz_category = ' . (int) $category_id : '') . '
+						' . (($individual_category_selected) ? 'AND quiz_category = ' . (int) $category_id : '') . '
 						ORDER BY quiz_time DESC';
 		$quizzes_result = $db->sql_query_limit($quizzes_sql, $limit, $start);
 
@@ -835,6 +878,12 @@ function initialise_quiz_category($limit, $start, $category_id = null)
 		);
 	}
 
+	if (sizeof($category_data) == 0)
+	{
+		// If nothing got returned, display a nice error message to the user
+		trigger_error('UQM_CATEGORIES_NOT_AVAILABLE');
+	}
+
 	return $category_data;
 }
 
@@ -849,5 +898,16 @@ function sort_quiz_by_time($quiz_one, $quiz_two)
 	}
 	
 	return $sort_order;
+}
+
+function ensure_viewable_categories_exist()
+{
+	global $quiz_configuration;
+
+	if (sizeof($quiz_configuration->qc_user_viewable_categories) == 0)
+	{
+		// If the size of the viewable categories list is 0, then we have no appropriate categories to display
+		trigger_error('UQM_CATEGORIES_NOT_AVAILABLE');
+	}
 }
 ?>

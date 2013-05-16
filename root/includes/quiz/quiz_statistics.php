@@ -73,7 +73,7 @@ class quiz_statistics
 	// Survey's - show a rundown of how users have submitted answers. I think users will like this module!
 	function survey()
 	{
-		global $db, $template, $quiz_configuration;
+		global $user, $db, $template, $quiz_configuration;
 
 		$questions = $ids = $answers = $totals = array();
 
@@ -120,7 +120,7 @@ class quiz_statistics
 					$percent = 100 * ($answer_selected / $totals[$row_id]);
 
 					$template->assign_block_vars('question_row.answer_row', array(
-						'U_ANSWER_NAME'		=> $answer_name,
+						'U_ANSWER_NAME'		=> (strlen($answer_name) > 0) ? $answer_name : $user->lang['UQM_QUIZ_STATISTICS_UNANSWERED'],
 						'U_ANSWER_SELECTED'	=> number_format($percent, 1),
 					));
 				}

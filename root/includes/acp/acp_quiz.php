@@ -112,7 +112,9 @@ class acp_quiz
 					'U_GROUP_REWARDS'			=> (isset($destination_group) && isset($group_percentage)),
 					'U_GROUP_PERCENTAGE'		=> $group_percentage,
 					'U_GROUP_LIST'				=> $this->create_usergroup_list($destination_group),
-					'U_MULTI_GROUP_LIST'		=> $this->multi_group_select_options($permitted_groups) // Group permissions
+
+					// Have the currently chosen groups appear automatically selected for the group permissions
+					'U_MULTI_GROUP_LIST'		=> $this->multi_group_select_options($permitted_groups)
 				));
 				
 				$this->tpl_name = 'acp_quiz_category';
@@ -181,7 +183,9 @@ class acp_quiz
 					'U_GROUP_REWARDS'		=> false,
 					'U_GROUP_PERCENTAGE'	=> '',
 					'U_GROUP_LIST'			=> $this->create_usergroup_list(),
-					'U_MULTI_GROUP_LIST'	=> $this->multi_group_select_options(array(2)) // Group permissions
+
+ 					// Group permissions, default to registered users when adding a new category
+					'U_MULTI_GROUP_LIST'	=> $this->multi_group_select_options(array(2))
 				));
 				
 				$this->tpl_name = 'acp_quiz_category';

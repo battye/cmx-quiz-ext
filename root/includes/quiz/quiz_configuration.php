@@ -12,9 +12,14 @@ class quiz_configuration
 	var $qc_config_array;
 	var $qc_config_value;
 
+	// Which categories this user is allowed to view
+	var $qc_user_viewable_categories = array();
+
 	function load()
 	{
-		global $config;
+		global $config, $user;
+
+		$this->qc_user_viewable_categories = $this->get_categories_user_can_access($user->data['user_id']);
 
 		// Load in configuration fields from config table
 		$this->qc_config_array = array(
@@ -115,7 +120,7 @@ class quiz_configuration
 		global $db, $user, $phpbb_root_path, $phpEx;
 
 		// Include this for the usergroup functions
-		include($phpbb_root_path . 'includes/functions_user.' . $phpEx);
+		include_once($phpbb_root_path . 'includes/functions_user.' . $phpEx);
 
 		// Get the basic quiz and category details
 		$sql = 'SELECT c.* 
@@ -328,19 +333,36 @@ class quiz_configuration
 	}
 
 	// List quiz categories
-	function categories($default_id = 0)
+	function categories($default_id = 0, $restrict_by_access = false)
 	{
 		global $db;
 
 		$sql = 'SELECT * FROM ' . QUIZ_CATEGORIES_TABLE;
+
+		if ($restrict_by_access)
+		{
+			// Don't continue if no categories are available
+			if (sizeof($this->qc_user_viewable_categories) == 0)
+			{
+				trigger_error('UQM_CATEGORIES_NOT_AVAILABLE');
+			}
+
+			// If we are restricting by access, that means we don't want to show any categories that this
+			// user can't access.
+			$sql .= ' WHERE ' . $db->sql_in_set('quiz_category_id', $this->qc_user_viewable_categories);
+		}
+
 		$result = $db->sql_query($sql);
 
 		$select = '<select name="category">';
-		while( $row = $db->sql_fetchrow($result) )
+
+		while ($row = $db->sql_fetchrow($result))
 		{
+			// If a default id is given, then ensure that it is selected by default
 			$selected = ($row['quiz_category_id'] == $default_id) ? ' selected="selected"' : '';
 			$select .= '	<option value="' . $row['quiz_category_id'] . '"' . $selected . '>' . $row['quiz_category_name'] . '</option>';
 		}
+
 		$select .= '</select>';
 	
 		return $select;
@@ -428,7 +450,40 @@ class quiz_configuration
 		return implode(", ", $string);
 	}
 
-	// Authentication for certain pages: 'statistics', 'edit'
+	// Return the list of categories a user can access
+	function get_categories_user_can_access($user_id)
+	{
+		global $db, $user, $phpbb_root_path, $phpEx;
+
+		// Include this for the usergroup functions
+		include_once($phpbb_root_path . 'includes/functions_user.' . $phpEx);
+
+		// This is what will get returned
+		$acceptable_categories = array();
+
+		$sql = 'SELECT quiz_category_id, quiz_category_group_ids
+				FROM ' . QUIZ_CATEGORIES_TABLE;
+
+		$result = $db->sql_query($sql);
+
+		// Iterate through each category and check if the specified user is a member of any of the usergroups,
+		// if so then add that category to the list of acceptable categories.
+		while ($row = $db->sql_fetchrow($result))
+		{
+			$group_id_array = explode(",", $row['quiz_category_group_ids']);
+			$is_user_in_group = group_memberships($group_id_array, $user_id, true);
+
+			if ($is_user_in_group)
+			{
+				// The user is in the group
+				$acceptable_categories[] = (int) $row['quiz_category_id'];				
+			}
+		}
+
+		return $acceptable_categories;
+	}
+
+	// Authentication for certain pages: 'statistics', 'edit', 'submit', 'play'
 	function auth($case, $parameters = false)
 	{
 		// if the "return_value" parameter is true, then we want to return a true or false value
@@ -436,13 +491,34 @@ class quiz_configuration
 		// to the particular case.
 		$can_view = true;
 
+		if (isset($parameters['quiz_information']))
+		{
+			// If we have quiz information, we can do a catch all check on whether the category is accessible
+			$quiz_category_id = (int) $parameters['quiz_information']['quiz_category'];				
+			$category_accessible = in_array($quiz_category_id, $this->qc_user_viewable_categories);
+
+			if (!$category_accessible)
+			{
+				if ($parameters['return_value'])
+				{
+					$can_view = false;
+				}
+
+				else
+				{
+					trigger_error('UQM_CATEGORY_QUIZ_NO_PERMISSION');
+				}
+			}
+
+		}
+
 		switch($case)
 		{
 			// Parameters passed in: administrator, qc_admin_submit_only configuration setting
 			case 'submit':
-				if( $parameters['submit_setting'] && !$parameters['administrator'] ) 
+				if ($parameters['submit_setting'] && !$parameters['administrator']) 
 				{				
-					if( $parameters['return_value'] )
+					if ($parameters['return_value'])
 					{
 						$can_view = false;
 					}
@@ -454,11 +530,13 @@ class quiz_configuration
 				}
 				
 				break;
+
 			// Parameters passed in: administrator, user_id, quiz_information, played_quiz
 			case 'statistics':
+				// Is this user the author
 				$is_author = ($parameters['quiz_information']['user_id'] == $parameters['user_id']) ? true : false;
 
-				if( !$parameters['administrator'] && !$parameters['played_quiz'] && !$is_author )
+				if (!$parameters['administrator'] && !$parameters['played_quiz'] && !$is_author)
 				{
 					// If the user is not an administrator, the quiz author or played the quiz - error
 					if( $parameters['return_value'] )
@@ -471,25 +549,31 @@ class quiz_configuration
 						trigger_error('UQM_QUIZ_STATISTICS_CANNOT_VIEW');
 					}
 				}
+
+				break;
+
+			// Play permissions
+			case 'play':
+				// TODO: any additional play permissions. Basically a placeholder for later
 				break;
 
 			// Parameters passed in: administrator, user_id, quiz_information
 			case 'edit':
 				// Only worry about checking if the user is not an administrator
-				if( !$parameters['administrator'] )
+				if (!$parameters['administrator'])
 				{
 					// Is this non-admin user the quiz author?
 					$is_author = ($parameters['quiz_information']['user_id'] == $parameters['user_id']) ? true : false;
 
 					// Can users edit their own quizzes?
-					if( !($this->value('qc_quiz_author_edit') && $is_author) )
+					if (!($this->value('qc_quiz_author_edit') && $is_author))
 					{
 						// Through the negation, we know that the user is not the author
 						// The only way this if statement will NOT be accessed is if both the config
 						// setting and $is_author are true. If either of them are false, the user
 						// don't have the required permissions to edit.
 
-						if( $parameters['return_value'] )
+						if ($parameters['return_value'])
 						{
 							$can_view = false;
 						}

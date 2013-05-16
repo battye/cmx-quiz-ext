@@ -30,6 +30,9 @@ $lang = array_merge($lang, array(
 	'UQM_CATEGORY_NO_QUIZZES'		=> 'There are no quizzes in this category.',
 	'UQM_CATEGORY_NO_QUIZZES_FOUND'	=> 'No quizzes found on this page number.',
 	'UQM_CATEGORY_VIEW_ALL'			=> '%sClick here%s to view all quizzes from this category.',
+	'UQM_CATEGORY_NO_PERMISSION'	=> 'You do not have the required permissions to view this category.',
+	'UQM_CATEGORY_QUIZ_NO_PERMISSION'	=> 'You do not have the required permissions to view quizzes from this category.',
+	'UQM_CATEGORIES_NOT_AVAILABLE'	=> 'There are no quiz categories to display.',
 
 	'UQM_SUBMIT_NO_PERMISSIONS'		=> 'Only administrators are permitted to submit quizzes.',
 	'UQM_ENTER_QUESTION'			=> 'Enter the question',
@@ -44,6 +47,7 @@ $lang = array_merge($lang, array(
 	'UQM_SELECT_ANSWERS'			=> 'Select the correct answer',
 	'UQM_SELECT_ANSWERS_EXPLAIN'		=> 'In the answers below, please select the correct answer.',
 	'UQM_ENTER_ALL_CORRECT'			=> 'Please select a correct answer for each question and a name for this quiz.',
+	'UQM_ENTER_VALID_CATEGORY'		=> 'Please select another category, as you do not have access to the category currently selected.',
 	'UQM_QUIZ_SUBMITTED'			=> 'The quiz has now been submitted into the database.<br />Click %shere%s to return to the quiz index page.',
 	'UQM_ENTER_QUIZ_NAME'			=> 'Please enter the quiz name',
 	'UQM_ENTER_QUIZ_CATEGORY'		=> 'Please select a quiz category',
@@ -81,6 +85,7 @@ $lang = array_merge($lang, array(
 	'UQM_QUIZ_STATISTICS_CANNOT_VIEW'	=> 'Only administrators, the quiz author and users who have played the quiz may view the quiz statistics.',
 	'UQM_STATISTICS_NO_ENTRIES'		=> 'There are no entries',
 	'UQM_QUIZ_STATISTICS_ANSWER'		=> 'User answer',
+	'UQM_QUIZ_STATISTICS_UNANSWERED'	=> 'Unanswered',
 
 	'UQM_EDIT_NOT_ALLOWED'			=> 'You do not have the required permissions to edit this quiz.',
 	'UQM_EDIT_QUIZ'				=> 'Edit quiz',
