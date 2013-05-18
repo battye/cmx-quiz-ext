@@ -54,20 +54,30 @@ class quiz_question
 
 		$question_insert = array();
 
-		foreach( $question_array as $question_data )
+		foreach ($question_array as $question_data)
 		{
 			$data_answers	= $question_data->show_answers();
 			$correct_value	= $data_answers[$question_data->correct];
 
-			if( in_array($correct_value, $data_answers) )
+			if (in_array($correct_value, $data_answers))
 			{
+				// Prepare the question name to allow bbCode
+				$uid = $bitfield = $options = '';
+				$allow_bbcode = $allow_urls = $allow_smilies = true;
+
+				$question_name = $question_data->question;
+				generate_text_for_storage($question_name, $uid, $bitfield, $options, $allow_bbcode, $allow_urls, $allow_smilies);
+
 				$question_insert[] = array(
-					'question_name'		=> utf8_normalize_nfc($question_data->question),
+					'question_name'		=> utf8_normalize_nfc($question_name),
 					'question_correct'	=> utf8_normalize_nfc($correct_value),
 					'question_answers'	=> utf8_normalize_nfc($question_data->show_answers(true)),
 					'question_quiz'		=> (int) $quiz_id,
-				);
 
+					'question_bbcode_bitfield'	=> $bitfield,
+					'question_bbcode_uid'		=> $uid,
+					'question_bbcode_options'	=> $options
+				);
 			}
 		}
 
@@ -87,7 +97,7 @@ class quiz_question
 		if (!empty($in_quiz_name))
 		{
 			$new_name = "quiz_name = '";
-			$new_name .= $db->sql_escape( utf8_normalize_nfc($in_quiz_name) );
+			$new_name .= $db->sql_escape(utf8_normalize_nfc($in_quiz_name));
 			$new_name .= "', ";
 		}
 
@@ -100,14 +110,25 @@ class quiz_question
 		$db->sql_query('UPDATE ' . QUIZ_TABLE . ' SET ' . $new_name . $new_time_limit . '
 						quiz_category = ' . (int) $in_quiz_category . ' WHERE quiz_id = ' . (int) $in_quiz_id); 
 		
-		foreach($question_array as $question)
+		foreach ($question_array as $question)
 		{
+			// Prepare the question name to allow bbCode
+			$uid = $bitfield = $options = '';
+			$allow_bbcode = $allow_urls = $allow_smilies = true;
+
+			$question_name = $question->show_question();
+			generate_text_for_storage($question_name, $uid, $bitfield, $options, $allow_bbcode, $allow_urls, $allow_smilies);
+
 			// Actually update the question data now
 			$sql_data = array(
-				'question_name'		=> utf8_normalize_nfc($question->show_question()),
+				'question_name'		=> utf8_normalize_nfc($question_name),
 				'question_correct'	=> utf8_normalize_nfc($question->show_correct()),
 				'question_answers'	=> utf8_normalize_nfc($question->show_answers(true)),
 				'question_quiz'		=> (int) $in_quiz_id,
+
+				'question_bbcode_bitfield'	=> $bitfield,
+				'question_bbcode_uid'		=> $uid,
+				'question_bbcode_options'	=> $options
 			);
 		
 			$sql = 'UPDATE ' . QUIZ_QUESTIONS_TABLE . ' 
@@ -121,7 +142,7 @@ class quiz_question
 	// Preparation for editing a quiz
 	function edit($in_quiz_id)
 	{
-		return $this->play($in_quiz_id);
+		return $this->get_question_data($in_quiz_id, 'edit');
 	}
 
 	// Delete a quiz and all of its contents
@@ -135,7 +156,7 @@ class quiz_question
 		$sql[] = 'DELETE FROM ' . QUIZ_TABLE . ' WHERE quiz_id = ' . (int) $in_quiz_id;
 		$sql[] = 'DELETE FROM ' . QUIZ_QUESTIONS_TABLE . ' WHERE question_quiz = ' . (int) $in_quiz_id;
 
-		foreach($sql as $query)
+		foreach ($sql as $query)
 		{
 			// Perform the query
 			$db->sql_query($query);
@@ -144,6 +165,12 @@ class quiz_question
 
 	// Preparation for playing a quiz
 	function play($in_quiz_id)
+	{
+		return $this->get_question_data($in_quiz_id, 'play');
+	}
+
+	// Get question data
+	function get_question_data($in_quiz_id, $mode = 'play')
 	{
 		global $db;
 
@@ -154,8 +181,20 @@ class quiz_question
 		$result = $db->sql_query($sql);
 		$object_array = array();
 
-		while( $row = $db->sql_fetchrow($result) )
+		while ($row = $db->sql_fetchrow($result))
 		{
+			if ($mode == 'play')
+			{
+				// Parse the bbCode
+				$row['question_name'] = generate_text_for_display($row['question_name'], $row['question_bbcode_uid'], $row['question_bbcode_bitfield'], $row['question_bbcode_options']);
+			}
+
+			else
+			{
+				// Edit mode
+				decode_message($row['question_name'], $row['question_bbcode_uid']);
+			}
+
 			$quiz_question = new quiz_question;
 			$quiz_question->initialise($row['question_name'], explode("\n", $row['question_answers']), $row['question_correct'], $row['question_id']);
 
@@ -166,6 +205,7 @@ class quiz_question
 
 		return $object_array;
 	}
+
 
 	// Get the incomplete and current sessions for this user and for this quiz 
 	function get_session_status($quiz_id, $user_id, $current_time)

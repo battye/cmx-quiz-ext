@@ -36,9 +36,9 @@ $lang = array_merge($lang, array(
 
 	'UQM_SUBMIT_NO_PERMISSIONS'		=> 'Only administrators are permitted to submit quizzes.',
 	'UQM_ENTER_QUESTION'			=> 'Enter the question',
-	'UQM_ENTER_QUESTION_EXPLAIN'		=> 'bbCode is not permitted.',
+	'UQM_ENTER_QUESTION_EXPLAIN'		=> 'bbCode is permitted in questions.',
 	'UQM_ENTER_ANSWERS'			=> 'Enter the answers',
-	'UQM_ENTER_ANSWERS_EXPLAIN'		=> 'Separate each answer by a new line.',
+	'UQM_ENTER_ANSWERS_EXPLAIN'		=> 'Separate each answer by a new line. bbCode is not permitted in answers.',
 	'UQM_PLUS_QUESTION'			=> 'Add question',
 	'UQM_MINUS_QUESTION'			=> 'Remove question',
 	'UQM_QUESTION_BOUNDARY_VIOLATE'		=> 'Please ensure the number of questions stays between %d and %d as set by the administrator.',	
