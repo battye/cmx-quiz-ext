@@ -28,7 +28,7 @@
 	<action-group>
 		<copy>
 			<file from="root/quiz.php" to="quiz.php"/>
-			<file from="root/quiz_installer.php" to="quiz_installer.php"/>
+			<file from="root/quiz_install.php" to="quiz_install.php"/>
 			<file from="root/includes/quiz/quiz.php" to="includes/quiz/quiz.php"/>
 			<file from="root/includes/quiz/quiz_configuration.php" to="includes/quiz/quiz_configuration.php"/>
 			<file from="root/includes/quiz/quiz_question.php" to="includes/quiz/quiz_question.php"/>
@@ -37,6 +37,7 @@
 			<file from="root/includes/acp/info/acp_quiz.php" to="includes/acp/info/acp_quiz.php"/>
 			<file from="root/language/en/acp/quiz.php" to="language/en/acp/quiz.php"/>
 			<file from="root/language/en/mods/quiz.php" to="language/en/mods/quiz.php"/>
+			<file from="root/language/en/mods/info_acp_quiz.php" to="language/en/mods/info_acp_quiz.php"/>
 			<file from="root/adm/style/acp_quiz.html" to="adm/style/acp_quiz.html"/>
 			<file from="root/adm/style/acp_quiz_category.html" to="adm/style/acp_quiz_category.html"/>
 			<file from="root/styles/prosilver/template/quiz_body.html" to="styles/prosilver/template/quiz_body.html"/>
@@ -48,6 +49,7 @@
 			<file from="root/styles/prosilver/template/quiz_submit_body.html" to="styles/prosilver/template/quiz_submit_body.html"/>
 			<file from="root/styles/prosilver/theme/images/icon_quiz.gif" to="styles/prosilver/theme/images/icon_quiz.gif"/>
 			<file from="root/styles/prosilver/imageset/en/button_quiz_new.gif" to="styles/prosilver/imageset/en/button_quiz_new.gif"/>
+			<file from="root/umil/*.*" to="umil/*.*" />
 		</copy>
 		<open src="includes/functions.php">
 			<edit>
@@ -66,13 +68,6 @@
 					<inline-find><![CDATA['button_topic_new']]></inline-find>
 					<inline-action type="after-add"><![CDATA[, 'button_quiz_new']]></inline-action>
 				</inline-edit>
-			</edit>
-		</open>
-		<open src="language/en/acp/common.php">
-			<edit>
-				<find><![CDATA[$lang = array_merge($lang, array(]]></find>
-				<action type="after-add"><![CDATA[	// Quiz Admin
-	'ACP_UQM_QUIZ' => 'Quiz',]]></action>
 			</edit>
 		</open>
 		<open src="styles/prosilver/template/overall_header.html">
@@ -115,6 +110,6 @@
 				<action type="after-add"><![CDATA[.icon-quiz						{ background-image: url("{T_THEME_PATH}/images/icon_quiz.gif"); }]]></action>
 			</edit>
 		</open>
-		<php-installer><![CDATA[quiz_installer.php]]></php-installer>
+		<php-installer><![CDATA[quiz_install.php]]></php-installer>
 	</action-group>
 </mod>
