@@ -44,6 +44,10 @@ switch($mode)
 		// Create the breadcrumbs
 		$quiz_configuration->breadcrumbs( array($user->lang['UQM_SUBMIT_QUIZ'] => append_sid('quiz.'. $phpEx, 'mode=submit')) );
 
+		$quiz_name = request_var('quiz_name', '');
+		$time_limit_minutes = request_var('time_limit_minutes', -1);
+		$time_limit_seconds = request_var('time_limit_seconds', -1);
+
 		// Set the page header
 		page_header($user->lang['UQM_SUBMIT_QUIZ']);
 
@@ -66,21 +70,19 @@ switch($mode)
 		$time_limits_enabled = ($quiz_configuration->value('qc_enable_time_limits')) ? true : false;
 
 		// Enter the questions and answers into the database
-		if( $submit_db )
+		if ($submit_db)
 		{
-			if( !check_form_key('uqm_submit') )
+			if (!check_form_key('uqm_submit'))
 			{
 				trigger_error('UQM_QUIZ_FORM_INVALID');
 			}
 
 			// See if the user has left any empty
-			$check_correct	= $quiz_configuration->check_correct_checked($current_questions); 
-
-			$quiz_name		= request_var('quiz_name', '');		
+			$check_correct	= $quiz_configuration->check_correct_checked($current_questions); 		
 			$quiz_category	= request_var('category', 1); // default to the first category
 
-			// Make sure this is definitely a category the user can access. If it's not, a message will be returned 
-			// to the user
+			// Make sure this is definitely a category the user can access. 
+			// If it's not, a message will be returned to the user
 			$category_is_valid = in_array($quiz_category, $quiz_configuration->qc_user_viewable_categories);
 
 			// Time limit
@@ -112,7 +114,7 @@ switch($mode)
 			}
 		}
 
-		$empty_twist	   = false;
+		$empty_twist = false;
 
 		// We want to populate the fields if the page has been submitted, otherwise do not worry
 		$populate_fields = null;
@@ -120,7 +122,7 @@ switch($mode)
 
 		// If the user wants to add or remove a question from the quiz (and not trying, for some reason, to submit
 		// the quiz at the same time or submit to the database!)
-		if( $enter_answers && !$submit_db )
+		if ($enter_answers && !$submit_db)
 		{
 			// And here we begin the populating, but with a twist
 			// if $empty_twist is TRUE after being passed by reference then there are some empty fields still
@@ -130,14 +132,14 @@ switch($mode)
 			$populate_fields = $quiz_question->refresh_obtain($empty_twist);
 			$populate_size = sizeof($populate_fields);
 
-			if( $empty_twist )
+			if ($empty_twist)
 			{
 				$quiz_message = $user->lang['UQM_ENSURE_FIELDS_ARE_FILLED'];
 				$enter_answers = false;
 			}
 		}
 
-		else if( $alter_question ) // if the user is trying to add or remove a question
+		else if ($alter_question) // if the user is trying to add or remove a question
 		{
 			// And here we begin the populating
 			$quiz_question = new quiz_question;
@@ -145,7 +147,7 @@ switch($mode)
 			$populate_size = sizeof($populate_fields);
 
 			// Now we want a mechanism so users don't somehow add outside the allowed number of questions
-			switch( request_var('alter_question', '') )
+			switch (request_var('alter_question', ''))
 			{
 				case $user->lang['UQM_PLUS_QUESTION']:
 					$alter_question_value = 1;
@@ -157,7 +159,7 @@ switch($mode)
 					$alter_question_value = 0;
 			}
 
-			if( $quiz_configuration->check_question_boundaries($current_questions, $alter_question_value) )
+			if ($quiz_configuration->check_question_boundaries($current_questions, $alter_question_value))
 			{
 				$current_questions = $current_questions + $alter_question_value;
 			}
@@ -169,7 +171,7 @@ switch($mode)
 		}
 
 		// Show the questions, and if the add or remove button has been clicked act accordingly
-		for($i = 0; $i < $current_questions; $i++)
+		for ($i = 0; $i < $current_questions; $i++)
 		{
 			// If confirming the answers, get the array. Otherwise condense the answer, or show nothing.
 			$existing_answers  = ($i < $populate_size) ? $populate_fields[$i]->show_answers(true) : '';
@@ -184,7 +186,7 @@ switch($mode)
 			));
 
 			// Have the user select the correct answer
-			if( $enter_answers )
+			if ($enter_answers)
 			{
 				// Deal with the form key
 				add_form_key('uqm_submit');
@@ -219,8 +221,18 @@ switch($mode)
 		if ($time_limits_enabled)
 		{
 			// Create the drop down menus
-			$minutes_dropdown = $quiz_configuration->create_time_limit_dropdown('time_limit_minutes', 0, 60);
-			$seconds_dropdown = $quiz_configuration->create_time_limit_dropdown('time_limit_seconds', 0, 59);
+			if ($time_limit_minutes > -1 && $time_limit_seconds > -1)
+			{
+				// If the user already selected it, but had validation issues with their quiz, we want to retain it.
+				$minutes_dropdown = $quiz_configuration->create_time_limit_dropdown('time_limit_minutes', 0, 60, $time_limit_minutes);
+				$seconds_dropdown = $quiz_configuration->create_time_limit_dropdown('time_limit_seconds', 0, 59, $time_limit_seconds);
+			}
+
+			else
+			{
+				$minutes_dropdown = $quiz_configuration->create_time_limit_dropdown('time_limit_minutes', 0, 60);
+				$seconds_dropdown = $quiz_configuration->create_time_limit_dropdown('time_limit_seconds', 0, 59);
+			}
 		}
 
 		$template->assign_vars( array(
@@ -231,6 +243,8 @@ switch($mode)
 			'U_UQM_DISPLAY_ADD'			=> ($enter_answers) ? false : $allow_adding,
 			'U_UQM_DISPLAY_REMOVE'		=> ($enter_answers) ? false : $allow_removing,
 			'U_UQM_DISPLAY_MESSAGE'		=> $quiz_message,
+
+			'U_UQM_ENTER_QUIZ_NAME'		=> $quiz_name,
 			'U_QUIZ_CATEGORY_SELECT'	=> $quiz_configuration->categories(0, true),
 
 			// Time limit variables
@@ -273,9 +287,9 @@ switch($mode)
 		$count = 0;
 
 		// Check results, as the user has submitted their answers
-		if( !empty($_POST['submit']) )
+		if (!empty($_POST['submit']))
 		{
-			if( !check_form_key('uqm_play') )
+			if (!check_form_key('uqm_play'))
 			{
 				trigger_error('UQM_QUIZ_FORM_INVALID');
 			}
@@ -284,14 +298,13 @@ switch($mode)
 			$user_correct_answers	= 0;
 			$user_incorrect_answers	= 0;
 
-			foreach( $play_quiz as $question )
+			foreach ($play_quiz as $question)
 			{
 				// Get the actual information
 				$actual_answer 		= $question->show_correct();
 				$question_answers 	= $question->show_answers();
 
 				// Get the user submitted information, starting with the id of the user selected answer
-				
 				$user_submitted_id = request_var('answer_' . $count, -1); 
 
 				// ensure the user has selected an answer by ensuring it is in the question boundary,
@@ -308,7 +321,7 @@ switch($mode)
 				// Even if we don't use the message, we want to populate the statistics array
 				$results_message = $question->obtain_result_data($actual_answer, $db_answer, $question->show_question_id());
 
-				if( $quiz_configuration->value('qc_show_answers') )
+				if ($quiz_configuration->value('qc_show_answers'))
 				{
 					$template->assign_block_vars('result_row', array(
 						'U_QUESTION_NAME'	=> $question->show_question(),
@@ -353,7 +366,7 @@ switch($mode)
 		// The actual play quiz page - start a new quiz session
 		$play->insert_quiz_session($quiz_id);
 
-		foreach( $play_quiz as $question )
+		foreach ($play_quiz as $question)
 		{
 			$template->assign_block_vars('question_row', array(
 				'U_QUESTION_ID'		=> $count,
@@ -401,12 +414,12 @@ switch($mode)
 
 		$quiz_information = $quiz_configuration->determine_quiz_core($quiz_id);
 
-		if( !$quiz_information['quiz_id'] )
+		if (!$quiz_information['quiz_id'])
 		{
 			trigger_error('UQM_EDIT_NO_QUIZ');
 		}
 
-		if( $quiz_id )
+		if ($quiz_id)
 		{
 			$quiz_statistics = new quiz_statistics;
 			$quiz_statistics->initialise($quiz_id);

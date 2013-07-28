@@ -47,8 +47,8 @@ class acp_quiz
 
 					// Values to update, which we'll pass by reference to the validation checking function.
 					$category_name = request_var('category_name', '');
-					$group_rewards_destination_group_id = null;
-					$group_rewards_percentage = null;
+					$group_rewards_destination_group_id = 0;
+					$group_rewards_percentage = 0;
 					
 					// Group permissions
 					$group_permissions_groups = request_var('permitted_groups', array(0));
@@ -99,7 +99,7 @@ class acp_quiz
 
 				$category_name 			= $row['quiz_category_name'];
 				$category_description	= $row['quiz_category_description'];
-				$destination_group		= $row['quiz_category_destination_group_id'];
+				$destination_group		= ($row['quiz_category_destination_group_id'] != 0) ? $row['quiz_category_destination_group_id'] : null;
 				$group_percentage		= $row['quiz_category_destination_group_percentage'];
 				$permitted_groups		= explode(', ', $row['quiz_category_group_ids']); // Group permissions
 
@@ -110,7 +110,7 @@ class acp_quiz
 					'U_CATEGORY_VALUE'			=> $category_name,
 					'U_CATEGORY_DESCRIPTION'	=> $category_description,
 					'U_GROUP_REWARDS'			=> (isset($destination_group) && isset($group_percentage)),
-					'U_GROUP_PERCENTAGE'		=> $group_percentage,
+					'U_GROUP_PERCENTAGE'		=> ($group_percentage > 0) ? $group_percentage : null,
 					'U_GROUP_LIST'				=> $this->create_usergroup_list($destination_group),
 
 					// Have the currently chosen groups appear automatically selected for the group permissions
@@ -138,8 +138,8 @@ class acp_quiz
 					// so that they can be assigned values or updated if necessary. For example, there is no need to 
 					// update the group rewards variables unless the admin has enabled that for this category.
 					$category_name = request_var('category_name', '');
-					$group_rewards_destination_group_id = null;
-					$group_rewards_percentage = null;
+					$group_rewards_destination_group_id = 0;
+					$group_rewards_percentage = 0;
 					
 					// Group permissions
 					$group_permissions_groups = request_var('permitted_groups', array(0));

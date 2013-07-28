@@ -219,8 +219,8 @@ class quiz_question
 				WHERE s.quiz_id = q.quiz_id
 					AND s.user_id = ' . (int) $user_id . '
 					AND s.quiz_id = ' . (int) $quiz_id . '
-					AND s.started IS NOT NULL 
-					AND s.ended IS NULL
+					AND s.started > 0 
+					AND s.ended = 0
 					AND s.started > (' . ($current_time - (int) $quiz_configuration->value('qc_exclusion_time')) . ')
 				ORDER BY s.started DESC';
 
@@ -281,7 +281,7 @@ class quiz_question
 			'quiz_id'	=> (int) $quiz_id,
 			'user_id'	=> (int) $user->data['user_id'],
 			'started'	=> time(),
-			'ended'		=> null
+			'ended'		=> 0
 		);
 
 		$db->sql_query('INSERT INTO ' . QUIZ_SESSIONS_TABLE . ' ' . $db->sql_build_array('INSERT', $quiz_session_array));

@@ -16,15 +16,15 @@ class quiz_statistics
 	{
 		global $db, $template;
 
-		$this->question_ids 	= array();
-		$this->quiz_id 		= (int) $in_quiz_id;
+		$this->question_ids = array();
+		$this->quiz_id = (int) $in_quiz_id;
 	
 		$sql = 'SELECT DISTINCT(question_id) FROM ' . QUIZ_QUESTIONS_TABLE . '
 			WHERE question_quiz = ' . (int) $in_quiz_id;
 
 		$result = $db->sql_query($sql);
 
-		while( $row = $db->sql_fetchrow($result) )
+		while ($row = $db->sql_fetchrow($result))
 		{
 			$this->question_ids[] = (int) $row['question_id'];
 		}
@@ -77,22 +77,31 @@ class quiz_statistics
 
 		$questions = $ids = $answers = $totals = array();
 
-		$sql = 'SELECT q.question_name, s.quiz_question_id, s.quiz_user_answer, 
+		$sql = 'SELECT q.question_name, q.question_bbcode_bitfield, q.question_bbcode_uid, q.question_bbcode_options,
+			s.quiz_question_id, s.quiz_user_answer, 
 			COUNT(s.quiz_user_answer) AS selected	
 			FROM ' . QUIZ_STATISTICS_TABLE . ' s, ' . QUIZ_QUESTIONS_TABLE . ' q
 			WHERE ' . $db->sql_in_set('s.quiz_question_id', $this->question_ids) . '
 			AND s.quiz_question_id = q.question_id
-			GROUP BY s.quiz_question_id, q.question_name, s.quiz_user_answer';
+			GROUP BY s.quiz_question_id, q.question_name, q.question_bbcode_bitfield, q.question_bbcode_uid,
+			q.question_bbcode_options, s.quiz_user_answer';
 		$result = $db->sql_query($sql);
 
-		while( $row = $db->sql_fetchrow($result) )
+		while ($row = $db->sql_fetchrow($result))
 		{
 			$row_id = $row['quiz_question_id'];
 
 			// Store the question ids as unique identifiers, and the questions, answers and 
 			// answer count in the arrays
 			$ids[] = $row_id;
-			$questions[$row_id] = $row['question_name'];
+
+			$questions[$row_id] = array(
+				'question_name' => $row['question_name'],
+				'question_bbcode_bitfield' => $row['question_bbcode_bitfield'],
+				'question_bbcode_uid' => $row['question_bbcode_uid'],
+				'question_bbcode_options' => $row['question_bbcode_options']
+			);
+
 			$answers[$row_id][] = array($row['quiz_user_answer'] => $row['selected']);
 
 			// It should be equal to the play count for each, but it's good to be certain
@@ -103,19 +112,19 @@ class quiz_statistics
 
 		$unique_ids = array_unique($ids);
 	
-		foreach( $unique_ids as $row_id )
+		foreach ($unique_ids as $row_id)
 		{
-			// Question name, which is important as we are looping around the questions
-			$question_name = $questions[$row_id];	
+			// Question name, which is important as we are looping around the questions	
+			$question_name = generate_text_for_display($questions[$row_id]['question_name'], $questions[$row_id]['question_bbcode_uid'], $questions[$row_id]['question_bbcode_bitfield'], $questions[$row_id]['question_bbcode_options']);
 
 			$template->assign_block_vars('question_row', array(
 				'U_QUESTION_NAME'	=> $question_name,
 			));
 
-			for( $i = 0; $i < sizeof($answers[$row_id]); $i++ )
+			for ($i = 0; $i < sizeof($answers[$row_id]); $i++)
 			{
 				// Now we have the answer as well as how many times it was selected
-				foreach( $answers[$row_id][$i] as $answer_name => $answer_selected )
+				foreach ($answers[$row_id][$i] as $answer_name => $answer_selected)
 				{
 					$percent = 100 * ($answer_selected / $totals[$row_id]);
 
@@ -134,7 +143,8 @@ class quiz_statistics
 		global $db, $template, $quiz_configuration;
 
 		$sql_array = array(
-			'SELECT'	=> 'q.question_name, s.quiz_question_id, 
+			'SELECT'	=> 'q.question_name, s.quiz_question_id, q.question_bbcode_bitfield, 
+						q.question_bbcode_uid, q.question_bbcode_options,
 						COUNT(s.quiz_question_id) AS entries, SUM(s.quiz_is_correct) AS correct',
 
 			'FROM'		=> array(QUIZ_STATISTICS_TABLE => 's', QUIZ_QUESTIONS_TABLE => 'q'),
@@ -142,7 +152,8 @@ class quiz_statistics
 			'WHERE'		=> $db->sql_in_set('s.quiz_question_id', $this->question_ids) . '
 						AND s.quiz_question_id = q.question_id',
 
-			'GROUP_BY'	=> 's.quiz_question_id, q.question_name',
+			'GROUP_BY'	=> 's.quiz_question_id, q.question_name, q.question_bbcode_bitfield, 
+							q.question_bbcode_uid, q.question_bbcode_options',
 		);
 
 		$sql = $db->sql_build_query('SELECT', $sql_array);
@@ -150,11 +161,11 @@ class quiz_statistics
 
 		$counter = 0;
 
-		while( $row = $db->sql_fetchrow($result) )
+		while ($row = $db->sql_fetchrow($result))
 		{
 			$counter++;
 
-			$question 	= $row['question_name'];
+			$question 	= generate_text_for_display($row['question_name'], $row['question_bbcode_uid'], $row['question_bbcode_bitfield'], $row['question_bbcode_options']);
 			$plays		= $row['entries'];
 			$correct	= $row['correct'];
 			$incorrect	= $plays - $correct;
@@ -170,7 +181,7 @@ class quiz_statistics
 		$db->sql_freeresult($result);
 
 		// If there are no statistics, this looks nicer than printing out an empty table
-		if( !$counter )
+		if (!$counter)
 		{
 			// Print out a blank row in the template
 			$template->assign_var('U_QUESTION_SUMMARY_EMPTY', true);
