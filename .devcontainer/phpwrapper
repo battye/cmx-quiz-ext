@@ -1,0 +1,13 @@
+#!/bin/sh
+
+docker run \
+    --network=host \
+    --rm \
+    -e HOME="$HOME" \
+    -u $(id -u):$(id -g) \
+    -v "$HOME":"$HOME" \
+    -w "$PWD" \
+    php:8.1-apache \
+    php "$@"
+
+exit $?
