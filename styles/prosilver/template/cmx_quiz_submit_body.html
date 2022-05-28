@@ -1,0 +1,154 @@
+{% INCLUDECSS '@battye_cmxquiz/cmx_quiz.css' %}
+{% include 'overall_header.html' %}
+
+<h2>{% if CMX_QUIZ_IS_EDIT %}{{ lang('CMX_QUIZ_EDIT_QUIZ') }}{% else %}{{ lang('CMX_QUIZ_NEW') }}{% endif %}</h2>
+
+<form id="add_edit_form" name="add_edit_form" method="post">
+    {{ S_FORM_TOKEN }}
+    <div id="cmx_quiz_question_list">
+        <div class="panel cmx_quiz_information">
+            <div class="inner">
+                <h3>{{ lang('CMX_QUIZ_INFORMATION') }}</h3>
+                <div class="cmx_quiz_information">
+                    {{ lang('CMX_QUIZ_MINIMUM_AND_MAXIMUM_TEXT', CMX_QUIZ_MINIMUM_QUESTIONS, CMX_QUIZ_MAXIMUM_QUESTIONS )}}
+                </div>
+
+                <fieldset class="fields1">
+                    {# Quiz name #}
+                    <dl>
+                        <dt>
+                            <label for="title">{{ lang('CMX_QUIZ_NAME' )}}</label>
+                        </dt>
+                        <dd>
+                            <input class="inputbox autowidth" type="text" name="title" id="title" size="45" maxlength="124" 
+                                {% if CMX_QUIZ_IS_EDIT %}value="{{ CMX_QUIZ_NAME }}"{% endif %} placeholder="{{ lang('CMX_QUIZ_NAME_EXPLAIN') }}" />
+                        </dd>
+                    </dl>
+
+                    {# Description #}
+                    <dl>
+                        <dt>
+                            <label for="description">{{ lang('CMX_QUIZ_DESCRIPTION' )}}</label>
+                        </dt>
+                        <dd>
+                            <input class="inputbox autowidth" type="text" name="description" id="description" size="45" maxlength="255" 
+                                {% if CMX_QUIZ_IS_EDIT %}value="{{ CMX_QUIZ_DESCRIPTION }}"{% endif %} placeholder="{{ lang('CMX_QUIZ_DESCRIPTION_EXPLAIN') }}" />
+                        </dd>
+                    </dl>
+
+                    {% if CMX_QUIZ_TAGS|length > 0 %}
+                    {# Tag data #}
+                    <dl>
+                        <dt>
+                            <label for="description">{{ lang('CMX_QUIZ_TAGS' )}}</label>
+                        </dt>
+                        <dd>
+                            <select name="tags[]" id="tags" multiple="multiple" size="3" class="inputbox autowidth">
+                                {% for tag_id, tag_name in CMX_QUIZ_TAGS %}
+                                <option value="{{ tag_id }}"{% if CMX_QUIZ_IS_EDIT %}{% if tag_id in CMX_QUIZ_TAG_DATA %} selected{% endif %}{% endif %}>{{ tag_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </dd>
+                    </dl>
+                    {% endif %}
+                    
+                    {% if CMX_QUIZ_ALLOW_TIME_LIMITS %}
+                    {# Time limits #}
+                    <dl>
+                        <dt>
+                            <label for="limit">{{ lang('CMX_QUIZ_TIME_LIMIT' )}}</label>
+                        </dt>
+                        <dd>
+                            <input class="inputbox autowidth" type="number" name="limit" id="limit"
+                                {% if CMX_QUIZ_IS_EDIT %}value="{{ CMX_QUIZ_TIME_LIMIT }}"{% endif %} size="3" maxlength="3" /> {{ lang('CMX_QUIZ_TIME_LIMIT_MINUTES') }}
+                        </dd>
+                    </dl>
+                    {% endif %}
+
+                    {% if CMX_QUIZ_MODERATOR %}
+                    {% if CMX_QUIZ_ALLOW_MULTIPLE_ATTEMPTS %}
+                    {# Maximum attempts #}
+                    <dl>
+                        <dt>
+                            <label for="attempts">{{ lang('CMX_QUIZ_MAXIMUM_ATTEMPTS' )}}</label>
+                        </dt>
+                        <dd>
+                            <input class="inputbox autowidth" type="number" name="attempts" id="attempts" 
+                                {% if CMX_QUIZ_IS_EDIT %}value="{{ CMX_QUIZ_MAXIMUM_ATTEMPTS }}"{% endif %} size="3" maxlength="3" />
+                        </dd>
+                    </dl>
+                    {% endif %}
+
+                    {% if CMX_QUIZ_ALLOW_MOVE_TO_USERGROUP %}
+                    {# Usergroup rewards #}
+                    <dl>
+                        <dt>
+                            <label for="percentage">{{ lang('CMX_QUIZ_REWARD' )}}</label>
+                        </dt>
+                        <dd>
+                            {{ lang('CMX_QUIZ_REWARD_SCORE' )}} <input class="inputbox autowidth" type="number" name="percentage" id="percentage" 
+                                {% if CMX_QUIZ_IS_EDIT %}value="{{ CMX_QUIZ_MINIMUM_PASS_MARK }}"{% endif %} size="3" maxlength="3" /> {{ lang('CMX_QUIZ_REWARD_GROUP' )}} 
+                            <select class="inputbox autowidth" name="pass_mark_group_id" id="group">
+                                <option value="0">{{ lang('CMX_QUIZ_REWARD_NO_GROUP') }}</option>
+                                {% for group in CMX_QUIZ_USERGROUPS %}
+                                <option value="{{ group.group_id }}"{% if CMX_QUIZ_IS_EDIT %}{% if CMX_QUIZ_PASS_MARK_GROUP_ID == group.group_id %} selected{% endif %}{% endif %}>{{ group.group_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </dd>
+                    </dl>
+                    {% endif %}
+
+                    {% if CMX_QUIZ_IS_EDIT %}
+                    {# Delete the quiz #}
+                    <dl>
+                        <dt>
+                            <label for="delete">{{ lang('CMX_QUIZ_DELETE_QUIZ' )}}</label><br />
+                            <span>{{ lang('CMX_QUIZ_DELETE_QUIZ_EXPLAIN' )}}</span>
+                        </dt>
+                        <dd>
+                            <input class="inputbox autowidth" type="checkbox" name="delete_quiz" id="delete_quiz" />
+                        </dd>
+                    </dl>
+                    {% endif %}
+                    {% endif %}
+                </fieldset>
+            </div>
+        </div>
+
+        {% for counter in CMX_QUIZ_COUNTER %}
+        {% include '@battye_cmxquiz/component/cmx_quiz_submit_question.html' %}
+        {% endfor %}
+    </div>
+
+    <div class="action-bar bar-bottom">
+        {# New quiz button #}
+        <a href="javascript:void(0)" class="button" title="{{ lang('CMX_QUIZ_NEW_QUESTION') }}" id="cmx_quiz_new_question">
+            <span>{{ lang('CMX_QUIZ_NEW_QUESTION') }}</span> <i class="icon fa-pencil fa-fw" aria-hidden="true"></i>
+        </a>
+    </div>
+
+    <div class="panel bg2">
+        <div class="inner">
+        <fieldset class="submit-buttons">
+            <input type="submit" name="submit" value="{{ lang('CMX_QUIZ_SUBMIT_QUIZ') }}" class="button1 default-submit-action">
+        </fieldset>
+        </div>
+    </div>
+</form>
+
+<script>
+    var form_name = 'add_edit_form', text_name = 'message[1]';
+
+    var formUrl = "{{ U_ACTION }}";
+    var minimumQuestions = {{ CMX_QUIZ_MINIMUM_QUESTIONS }};
+    var maximumQuestions = {{ CMX_QUIZ_MAXIMUM_QUESTIONS }};
+
+    var currentNumberOfQuestions = {{ CMX_QUIZ_COUNTER|length }};
+
+    // Lang vars
+    var alertTooManyQuestions = "{{ lang('CMX_QUIZ_ALERT_TOO_MANY_QUESTIONS') }}";
+    var invalidQuestionData = "{{ lang('CMX_QUIZ_ALERT_INVALID_QUESTION_DATA') }}";
+</script>
+
+{% INCLUDEJS '@battye_cmxquiz/cmx_quiz.js' %}
+{% include 'overall_footer.html' %}

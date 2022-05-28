@@ -1,0 +1,34 @@
+imports:
+    - { resource: tables.yml }
+
+services:
+    battye.cmxquiz.manager:
+        class: battye\cmxquiz\quiz\manager
+        arguments:             
+            - '@dbal.conn'
+            - '@config'
+            - '@user'
+            - '@user_loader'
+            - '@language'
+            - '%battye.cmxquiz.tables%'
+    battye.cmxquiz.controller:
+        class: battye\cmxquiz\controller\quiz
+        arguments:
+            - %core.root_path%
+            - %core.php_ext%
+            - '@request'
+            - '@config'
+            - '@controller.helper'
+            - '@template'
+            - '@user'
+            - '@pagination'
+            - '@language'
+            - '@battye.cmxquiz.manager'
+    battye.cmxquiz.listener:
+        class: battye\cmxquiz\event\quiz_listener
+        arguments:
+            - '@config'
+            - '@controller.helper'
+            - '@template'
+        tags:
+            - { name: event.listener }

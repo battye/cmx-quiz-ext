@@ -1,0 +1,28 @@
+cmx_quiz_index:
+    path: /quiz/index
+    defaults: { _controller: battye.cmxquiz.controller:index }
+
+cmx_quiz_play:
+    path: /quiz/play/{id}/{questions}
+    requirements:
+        id: \d+
+    defaults: { _controller: battye.cmxquiz.controller:play, id: 0, questions: "" }
+
+cmx_quiz_results:
+    path: /quiz/results/{id}/{result}
+    requirements:
+        id: \d+
+        result: \d+
+    defaults: { _controller: battye.cmxquiz.controller:results, id: 0, result: 0 }
+
+cmx_quiz_answer:
+    path: /quiz/answer/{id}
+    requirements:
+        id: \d+
+    defaults: { _controller: battye.cmxquiz.controller:answer, id: 0 }
+
+cmx_quiz_submit:
+    path: /quiz/submit/{id}
+    requirements:
+        id: \d+
+    defaults: { _controller: battye.cmxquiz.controller:submit, id: 0 }

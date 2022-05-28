@@ -1,0 +1,35 @@
+{% INCLUDECSS '@battye_cmxquiz/cmx_quiz.css' %}
+{% INCLUDECSS '@battye_cmxquiz/cqa/styles.css' %}
+{% include 'overall_header.html' %}
+
+<h2>{{ CMX_QUIZ_NAME }}</h2>
+
+{% if CMX_QUIZ_MODERATOR %}
+<div class="action-bar bar-top">
+    {# Edit quiz button #}
+    <a href="{{ U_EDIT }}" class="button" title="{{ lang('CMX_QUIZ_EDIT_QUIZ') }}" id="cmx_quiz_edit_question">
+        <span>{{ lang('CMX_QUIZ_EDIT_QUIZ') }}</span> <i class="icon fa-pencil fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+{% endif %}
+    
+<div class="panel">
+    <div class="inner">
+        <h3>{{ lang('CMX_QUIZ') }}</h3>
+
+        <div class="content">
+            <app-root></app-root>
+            
+            {% INCLUDEJS '@battye_cmxquiz/cqa/runtime.js' %}
+            {% INCLUDEJS '@battye_cmxquiz/cqa/polyfills.js' %}
+            {% INCLUDEJS '@battye_cmxquiz/cqa/main.js' %}
+        </div>
+    </div>
+</div>
+
+<script>
+    window.cqaEndpoint = '{{ U_CQA_ENDPOINT }}?src=ext';
+</script>
+
+{% INCLUDEJS '@battye_cmxquiz/cmx_quiz.js' %}
+{% include 'overall_footer.html' %}

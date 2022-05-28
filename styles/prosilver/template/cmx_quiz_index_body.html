@@ -1,0 +1,104 @@
+{% INCLUDECSS '@battye_cmxquiz/cmx_quiz.css' %}
+{% include 'overall_header.html' %}
+
+    <h2>{{ lang('CMX_QUIZ') }}</h2>
+
+    <div class="action-bar bar-top">
+        {% if CMX_QUIZ_MODERATOR || (CMX_QUIZ_ALLOW_USER_SUBMISSIONS && not S_IS_BOT && S_USER_LOGGED_IN) %}
+        {# New quiz button #}
+        <a href="{{ U_SUBMIT }}" class="button" title="{{ lang('CMX_QUIZ_NEW') }}">
+            <span>{{ lang('CMX_QUIZ_NEW') }}</span> <i class="icon fa-pencil fa-fw" aria-hidden="true"></i>
+        </a>
+        {% endif %}
+
+        {# Quiz count information #}
+        <div class="pagination">
+            {{ lang('CMX_QUIZ_TOTAL', CMX_QUIZ_COUNT)}}
+        </div>
+    </div>
+
+    {% if CMX_QUIZ_COUNT == 0 %}
+	<div class="panel">
+		<div class="inner">
+		    <strong>{{ lang('CMX_QUIZ_TOTAL', 0) }}</strong>
+		</div>
+	</div>
+    {% else %}
+    <div class="forumbg">
+		<div class="inner">
+		<ul class="topiclist">
+			<li class="header">
+				<dl class="row-item">
+					<dt><div class="list-inner"><span>{{ lang('CMX_QUIZ') }}</span></div></dt>
+					<dd class="posts"><span>{{ lang('CMX_QUIZ_QUESTIONS') }}</span></dd>
+					<dd class="posts"><span>{{ lang('CMX_QUIZ_PLAYS') }}</span></dd>                    
+					<dd class="lastpost"><span>{{ lang('CMX_QUIZ_DATE') }}</span></dd>
+                </dl>
+			</li>
+		</ul>
+
+        <ul class="topiclist topics">
+        
+            {% for quiz in quizzes %}
+            <li class="row bg1">
+                <dl class="row-item {% if quiz.QUIZ_PLAYED %}cmx_quiz_played{% else %}cmx_quiz_unplayed{% endif %}">
+                    <dt>
+                        {# Show the quizzes #}
+                        <div class="list-inner">
+                            <a class="unread" href="{{ quiz.U_QUIZ }}">
+								<span class="sr-only">{{ quiz.QUIZ_NAME }}</span>
+							</a>
+
+                            {# Quiz name #}
+                            <a href="{{ quiz.U_QUIZ }}" class="topictitle">{{ quiz.QUIZ_NAME }}</a>
+                            <br />
+
+                            {# Quiz description #}
+                            <div class="topic-poster responsive-hide left-box">
+                                {{ quiz.QUIZ_DESCRIPTION }} 
+                            </div>
+
+                            {# Quiz tags #}
+                            {% if quiz.QUIZ_TAGS|length > 0 %}
+                            <div>
+                                <br />
+                                {% for tag in quiz.QUIZ_TAGS %}
+                                <span class="cmx_quiz_tag">{{ tag.tag_name }}</span>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </dt>
+
+                    {# Number of questions #}
+                    <dd class="posts">
+                        <span>{{ quiz.QUIZ_QUESTIONS }}</span>
+                    </dd>
+
+                    {# Number of plays #}
+                    <dd class="posts">
+                        <span>{{ quiz.QUIZ_PLAYS }}</span>
+                    </dd>
+                    
+                    {# Submitted by #}
+                    <dd class="lastpost">
+                        <span>{{ lang('POST_BY_AUTHOR') }} {{ quiz.U_SUBMITTER }}<br />{{ quiz.QUIZ_SUBMISSION_TIME }}</span>
+                    </dd>
+                </dl>
+            </li>
+            {% endfor %}
+
+
+        </ul>
+
+        </div>
+    </div>
+    {% endif %}
+
+    {% if pagination is defined %}
+    <div class="pagination cmx_quiz_pagination_spacer">
+    {% include('pagination.html') %}
+    </div>
+    {% endif %}
+
+{% include 'overall_footer.html' %}

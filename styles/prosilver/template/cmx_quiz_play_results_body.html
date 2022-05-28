@@ -1,0 +1,66 @@
+{% INCLUDECSS '@battye_cmxquiz/cmx_quiz.css' %}
+{% include 'overall_header.html' %}
+
+<h2>{{ lang('CMX_QUIZ_RESULTS') }} - {{ CMX_QUIZ_NAME }}</h2>
+
+{% if CMX_QUIZ_MODERATOR %}
+<div class="action-bar bar-top">
+    {# Edit quiz button #}
+    <a href="{{ U_EDIT }}" class="button" title="{{ lang('CMX_QUIZ_EDIT_QUIZ') }}" id="cmx_quiz_edit_question">
+        <span>{{ lang('CMX_QUIZ_EDIT_QUIZ') }}</span> <i class="icon fa-pencil fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+{% endif %}
+
+{% if CMX_QUIZ_RESULTS|length == 0 %}
+<div class="panel">
+    <div class="inner">
+        <strong>{{ lang('CMX_QUIZ_NO_RESULTS') }}</strong>
+    </div>
+</div>
+{% endif %}
+
+{% for result in CMX_QUIZ_RESULTS %}
+<div class="panel">
+    <div class="inner">
+        <h3>{{ result.played_by }} {% if CMX_QUIZ_MINIMUM_PASS_MARK %}{% if result.score_percentage >= CMX_QUIZ_MINIMUM_PASS_MARK %}{{ lang('CMX_QUIZ_RESULTS_PASSED') }}{% else %}{{ lang('CMX_QUIZ_RESULTS_FAILED') }}{% endif %}{% endif %} ({{ result.score_percentage }}%, {{ lang('CMX_QUIZ_RESULTS_TIME_TAKEN', result.time_taken) }}) - {{ result.play_time }}</h3>
+    
+        <div class="content">
+            <div class="cmx_quiz_result_row">
+                <div class="cmx_quiz_result_column">
+                    <strong>{{ lang('CMX_QUIZ_RESULTS_QUESTION') }}</strong>
+                </div>
+                <div class="cmx_quiz_result_column">
+                    <strong>{{ lang('CMX_QUIZ_RESULTS_USER') }}</strong>
+                </div>
+                {% if CMX_QUIZ_SHOW_CORRECT_ANSWERS %}
+                <div class="cmx_quiz_result_column">
+                    <strong>{{ lang('CMX_QUIZ_RESULTS_CORRECT') }}</strong>
+                </div>
+                {% endif %}
+            </div>
+
+            {% for question in result.display_questions.questions %}
+            <div class="cmx_quiz_result_row">
+                <div class="cmx_quiz_result_column">
+                    {{ question.question }}
+                </div>
+                <div class="cmx_quiz_result_column">
+                    <span class="{% if question.submission.correct %}cmx_quiz_result_correct{% else %}cmx_quiz_result_incorrect{% endif %}">{{ question.submission.answer }}</span>
+                </div>
+                {% if CMX_QUIZ_SHOW_CORRECT_ANSWERS %}
+                <div class="cmx_quiz_result_column">
+                    {% for answer in question.answers %}
+                    <div><span class="cmx_quiz_result_correct">{{ answer }}</span></div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+{% INCLUDEJS '@battye_cmxquiz/cmx_quiz.js' %}
+{% include 'overall_footer.html' %}

@@ -1,0 +1,132 @@
+.cmx_quiz_played {
+    background-image: url("./images/quiz_played.gif");
+}
+
+.cmx_quiz_unplayed {
+    background-image: url("./images/quiz_unplayed.gif");
+}
+
+.cmx_quiz_pagination_spacer {
+    margin-bottom: 5px;
+}
+
+.cmx_quiz_tag {
+    margin-top: 5px;
+    margin-bottom: 5px;
+    display: inline-block;
+    min-width: 20px;
+    padding: 0 6px;
+    font-size: 9px;
+    font-weight: 500;
+    line-height: 18px;
+    color: #FFFFFF;
+    text-align: center;
+    background-color: #233d89;
+    border: 1px solidr#233d89;
+    border-radius: 2em;
+}
+
+/* Submit */
+.cmx_quiz_information {
+    margin-bottom: 10px;
+}
+
+.cmx_quiz_answers {
+    padding-top: 14px;
+}
+
+.cmx_quiz_multiple_choice_answer {
+    margin-bottom: 5px;
+}
+
+/* Play */
+.cmx_quiz_play_blurb {
+    margin-top: 15px;
+    text-align: center;
+}
+
+/* Result screen */
+.cmx_quiz_result_column {
+    float: left;
+    width: 30%;
+    padding: 5px;
+}
+
+.cmx_quiz_result_row {
+    padding-bottom: 10px;
+    border-bottom: 1px solid #dfdfdf;
+}
+
+.cmx_quiz_result_row:after {
+    content: "";
+    display: table;
+    clear: both; /* Clear floats after the columns */
+}
+
+.cmx_quiz_result_correct {
+    color: green;
+}
+
+.cmx_quiz_result_incorrect {
+    color: red;
+}
+
+/* Styling for Angular components. Used https://getcssscan.com/css-buttons-examples */
+.cqa_cmx_quiz_column_left > button, .cqa_cmx_quiz_column_right > button {
+    background-color: #FFFFFF;
+    border: 1px solid rgb(209,213,219);
+    border-radius: .5rem;
+    box-sizing: border-box;
+    color: #111827;
+    /*font-family: "Inter var",ui-sans-serif,system-ui,-apple-system,system-ui,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";*/    
+    font-size: .875rem;
+    font-weight: 600;
+    line-height: 1.25rem;
+    padding: .75rem 1rem;
+    text-align: center;
+    text-decoration: none #D1D5DB solid;
+    text-decoration-thickness: auto;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+}
+
+.cqa_cmx_quiz_answer_input_answer_field {
+    background-color: #FFFFFF;
+    border: 1px solid rgb(209,213,219);
+    border-radius: .5rem;
+    box-sizing: border-box;
+    color: #111827;
+    font-weight: 600;
+    line-height: 1.25rem;
+    padding: .75rem 1rem;
+    text-decoration: none #D1D5DB solid;
+    text-decoration-thickness: auto;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.cqa_cmx_quiz_question_text > div {
+    font-size: .875rem;
+    font-weight: 600;
+    line-height: 1.25rem;
+}
+
+.cqa_cmx_quiz_answer_multiple_choice_answer_text {
+    font-size: .750rem;
+    font-weight: 600;
+    line-height: 1.25rem;
+    margin: 5px 5px 5px 5px;
+}
+
+.cqa_cmx_quiz_time_remaining, .cqa_cmx_quiz_question_number {
+    font-size: .750rem;
+    font-weight: 600;
+    line-height: 1.25rem;
+    margin: 5px 5px 5px 5px;
+}
+
+.cqa_cmx_quiz_container > * {
+    font-family: "Inter var",ui-sans-serif,system-ui,-apple-system,system-ui,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+}

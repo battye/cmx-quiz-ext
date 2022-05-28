@@ -1,0 +1,5 @@
+parameters:
+  battye.cmxquiz.tables:
+    quiz: '%core.table_prefix%quiz'
+    quiz_tag: '%core.table_prefix%quiz_tag'
+    quiz_result: '%core.table_prefix%quiz_result'

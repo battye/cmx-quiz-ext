@@ -1,0 +1,176 @@
+{% include 'overall_header.html' %}
+{% INCLUDECSS '@battye_cmxquiz/acp_cmx_quiz.css' %}
+{% INCLUDEJS '@battye_cmxquiz/acp_cmx_quiz.js' %}
+
+<h1>{{ lang('SETTINGS') }}</h1>
+
+<form id="acp_cmx_quiz" method="post" action="{{ U_ACTION }}">
+    <fieldset>
+        <legend>{{ lang('ACP_CMX_QUIZ_SETTINGS') }}</legend>
+        {# Enable feature #}
+        <dl>
+            <dt>
+                <label for="cmx_quiz_enabled">{{ lang('ACP_CMX_QUIZ_ENABLED') }}</label>
+            </dt>
+
+            <dd>
+                <input type="radio" class="radio" name="cmx_quiz_enabled" value="1" {% if ACP_CMX_QUIZ_ENABLED %}checked="checked" {% endif %}/> {{ lang('YES') }} &nbsp;
+                <input type="radio" class="radio" name="cmx_quiz_enabled" value="0" {% if not ACP_CMX_QUIZ_ENABLED %}checked="checked" {% endif %}/> {{ lang('NO') }}
+            </dd>
+        </dl>           
+
+        {# Allow time limits #}
+        <dl>
+            <dt>
+                <label for="cmx_quiz_allow_time_limits">{{ lang('ACP_CMX_QUIZ_ALLOW_TIME_LIMITS') }}</label><br />
+                <span>{{ lang('ACP_CMX_QUIZ_ALLOW_TIME_LIMITS_EXPLAIN') }}</span>
+            </dt>
+
+            <dd>
+                <input type="radio" class="radio" name="cmx_quiz_allow_time_limits" value="1" {% if ACP_CMX_QUIZ_ALLOW_TIME_LIMITS %}checked="checked" {% endif %}/> {{ lang('YES') }} &nbsp;
+                <input type="radio" class="radio" name="cmx_quiz_allow_time_limits" value="0" {% if not ACP_CMX_QUIZ_ALLOW_TIME_LIMITS %}checked="checked" {% endif %}/> {{ lang('NO') }}
+            </dd>
+        </dl>
+
+        {# Allow multiple attempts #}
+        <dl>
+            <dt>
+                <label for="cmx_quiz_allow_multiple_attempts">{{ lang('ACP_CMX_QUIZ_ALLOW_MULTIPLE_ATTEMPTS') }}</label><br />
+                <span>{{ lang('ACP_CMX_QUIZ_ALLOW_MULTIPLE_ATTEMPTS_EXPLAIN') }}</span>
+            </dt>
+
+            <dd>
+                <input type="radio" class="radio" name="cmx_quiz_allow_multiple_attempts" value="1" {% if ACP_CMX_QUIZ_ALLOW_MULTIPLE_ATTEMPTS %}checked="checked" {% endif %}/> {{ lang('YES') }} &nbsp;
+                <input type="radio" class="radio" name="cmx_quiz_allow_multiple_attempts" value="0" {% if not ACP_CMX_QUIZ_ALLOW_MULTIPLE_ATTEMPTS %}checked="checked" {% endif %}/> {{ lang('NO') }}
+            </dd>
+        </dl>
+
+        {# Allow move to usergroup #}
+        <dl>
+            <dt>
+                <label for="cmx_quiz_allow_move_to_usergroup">{{ lang('ACP_CMX_QUIZ_ALLOW_MOVE_TO_USERGROUP') }}</label><br />
+                <span>{{ lang('ACP_CMX_QUIZ_ALLOW_MOVE_TO_USERGROUP_EXPLAIN') }}</span>
+            </dt>
+
+            <dd>
+                <input type="radio" class="radio" name="cmx_quiz_allow_move_to_usergroup" value="1" {% if ACP_CMX_QUIZ_ALLOW_MOVE_TO_USERGROUP %}checked="checked" {% endif %}/> {{ lang('YES') }} &nbsp;
+                <input type="radio" class="radio" name="cmx_quiz_allow_move_to_usergroup" value="0" {% if not ACP_CMX_QUIZ_ALLOW_MOVE_TO_USERGROUP %}checked="checked" {% endif %}/> {{ lang('NO') }}
+            </dd>
+        </dl>
+
+        {# Allow user submissions #}
+        <dl>
+            <dt>
+                <label for="cmx_quiz_allow_user_submissions">{{ lang('ACP_CMX_QUIZ_ALLOW_USER_SUBMISSIONS') }}</label><br />
+                <span>{{ lang('ACP_CMX_QUIZ_ALLOW_USER_SUBMISSIONS_EXPLAIN') }}</span>
+            </dt>
+
+            <dd>
+                <input type="radio" class="radio" name="cmx_quiz_allow_user_submissions" value="1" {% if ACP_CMX_QUIZ_ALLOW_USER_SUBMISSIONS %}checked="checked" {% endif %}/> {{ lang('YES') }} &nbsp;
+                <input type="radio" class="radio" name="cmx_quiz_allow_user_submissions" value="0" {% if not ACP_CMX_QUIZ_ALLOW_USER_SUBMISSIONS %}checked="checked" {% endif %}/> {{ lang('NO') }}
+            </dd>
+        </dl>
+        
+        {# Show correct answers #}
+        <dl>
+            <dt>
+                <label for="cmx_quiz_show_correct_answers">{{ lang('ACP_CMX_QUIZ_SHOW_CORRECT_ANSWERS') }}</label><br />
+                <span>{{ lang('ACP_CMX_QUIZ_SHOW_CORRECT_ANSWERS_EXPLAIN') }}</span>
+            </dt>
+
+            <dd>
+                <input type="radio" class="radio" name="cmx_quiz_show_correct_answers" value="1" {% if ACP_CMX_QUIZ_SHOW_CORRECT_ANSWERS %}checked="checked" {% endif %}/> {{ lang('YES') }} &nbsp;
+                <input type="radio" class="radio" name="cmx_quiz_show_correct_answers" value="0" {% if not ACP_CMX_QUIZ_SHOW_CORRECT_ANSWERS %}checked="checked" {% endif %}/> {{ lang('NO') }}
+            </dd>
+        </dl>
+
+        {# Minimum posts #}
+        <dl>
+            <dt>
+                <label for="cmx_quiz_minimum_posts">{{ lang('ACP_CMX_QUIZ_MINIMUM_POSTS') }}</label><br />
+                <span>{{ lang('ACP_CMX_QUIZ_MINIMUM_POSTS_EXPLAIN') }}</span>
+            </dt>
+
+            <dd>
+                <input type="text" class="text" name="cmx_quiz_minimum_posts" value="{{ ACP_CMX_QUIZ_MINIMUM_POSTS }}" />
+            </dd>
+        </dl>
+
+        {# Minimum questions #}
+        <dl>
+            <dt>
+                <label for="cmx_quiz_minimum_questions">{{ lang('ACP_CMX_QUIZ_MINIMUM_QUESTIONS') }}</label>
+            </dt>
+
+            <dd>
+                <input type="text" class="text" name="cmx_quiz_minimum_questions" value="{{ ACP_CMX_QUIZ_MINIMUM_QUESTIONS }}" />
+            </dd>
+        </dl>
+
+        {# Maximum questions #}
+        <dl>
+            <dt>
+                <label for="cmx_quiz_maximum_questions">{{ lang('ACP_CMX_QUIZ_MAXIMUM_QUESTIONS') }}</label>
+            </dt>
+
+            <dd>
+                <input type="text" class="text" name="cmx_quiz_maximum_questions" value="{{ ACP_CMX_QUIZ_MAXIMUM_QUESTIONS }}" />
+            </dd>
+        </dl>
+
+        {# Quizzes per page #}
+        <dl>
+            <dt>
+                <label for="cmx_quiz_per_page">{{ lang('ACP_CMX_QUIZ_PER_PAGE') }}</label><br />
+                <span>{{ lang('ACP_CMX_QUIZ_PER_PAGE_EXPLAIN') }}</span>
+            </dt>
+
+            <dd>
+                <input type="text" class="text" name="cmx_quiz_per_page" value="{{ ACP_CMX_QUIZ_PER_PAGE }}" />
+            </dd>
+        </dl>
+
+        {# Quiz moderator group #}
+        <dl>
+            <dt>
+                <label for="cmx_quiz_moderate_group_id">{{ lang('ACP_CMX_QUIZ_MODERATE_GROUP_ID') }}</label><br />
+                <span>{{ lang('ACP_CMX_QUIZ_MODERATE_GROUP_ID_EXPLAIN') }}</span>
+            </dt>
+
+            <dd>
+                <select name="cmx_quiz_moderate_group_id">
+                    {% for group in ACP_CMX_QUIZ_MODERATOR_GROUPS %}
+                    <option value="{{ group.group_id }}"{% if ACP_CMX_QUIZ_MODERATE_GROUP_ID == group.group_id %} selected{% endif %}>{{ group.group_name }}</option>
+                    {% endfor %}
+                </select>
+            </dd>
+        </dl>
+    </fieldset>
+
+    <fieldset>
+        <legend>{{ lang('ACP_CMX_QUIZ_TAGS') }}</legend>
+
+        <div class="acp_cmx_quiz_tag_list">
+            {% for quiz_tag_id, tag_name in ACP_CMX_QUIZ_TAGS %}
+            <div class="acp_cmx_quiz_tag_edit">
+                <input type="text" class="text" name="cmx_quiz_tags[{{ quiz_tag_id }}]" value="{{ tag_name }}" /> <a href="javascript:void(0)" data-id="{{ quiz_tag_id }}" class="acp_cmx_quiz_tag_delete">[x]</a>
+            </div>
+            {% endfor %}
+        </div>
+
+        <a href="javascript:void(0)" id="acp_cmx_quiz_tag_add">[+]</a>
+    </fieldset>
+
+    <fieldset>
+        <legend>{{ lang('ACP_SUBMIT_CHANGES') }}</legend>
+
+        <p class="submit-buttons">
+            <input class="button1" type="submit" id="submit" name="submit" value="{{ lang('SUBMIT') }}" />&nbsp;
+            <input class="button2" type="reset" id="reset" name="reset" value="{{ lang('RESET') }}" />
+        </p>
+
+        {{ S_FORM_TOKEN }}
+    </fieldset>
+</form>
+
+{% INCLUDE 'overall_footer.html' %}
