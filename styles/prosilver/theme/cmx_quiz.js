@@ -87,6 +87,7 @@ $("#add_edit_form").submit(function(event) {
     var form = $(this);
 
     var valid = true;
+    var invalidReason = '';
     var questionIds = [];
     var questionSubmissionArray = {
         "questions": []
@@ -103,6 +104,7 @@ $("#add_edit_form").submit(function(event) {
         if (questionText.length < 1) {
             // Validation error: empty question
             valid = false;
+            invalidReason = invalidQuestionEmpty;
         }
 
         // Check answer
@@ -127,11 +129,13 @@ $("#add_edit_form").submit(function(event) {
         if (!atLeastOneCorrect) {
             // Validation error: this question has no answer marked as correct
             valid = false;
+            invalidReason = invalidQuestionMissingCorrect;
         }
 
         if (correctAnswers.length != answerTexts.length) {
             // Validation error: some mismatch with the correct answers and the answers
             valid = false;
+            invalidReason = invalidQuestionMismatch;
         }
 
         var answerSubmissionSubArray = [];
@@ -139,6 +143,7 @@ $("#add_edit_form").submit(function(event) {
             if (answerTexts[i].length < 1) {
                 // Validation error: empty answer
                 valid = false;
+                invalidReason = invalidQuestionMissingAnswer;
             }
 
             answerSubmissionSubArray.push({
@@ -158,7 +163,7 @@ $("#add_edit_form").submit(function(event) {
 
     if (!valid) { 
         // Don't submit because the form is invalid, show a message to the user
-        alert(invalidQuestionData);
+        alert(invalidQuestionData + invalidReason);
     }  
 
     else {

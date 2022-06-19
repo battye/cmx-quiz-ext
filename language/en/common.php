@@ -36,7 +36,11 @@ $lang = array_merge($lang, [
     'CMX_QUIZ_ENTER_ANSWER_TEXT'            => 'Enter the answer details below and <strong>tick any correct answers.</strong>',
     'CMX_QUIZ_ENTER_ANSWER_TEXT_EXPLAIN'    => 'If only one answer is supplied, players must type in the correct answer. If multiple answers are supplied, players will be shown the options as multiple choices.',
     'CMX_QUIZ_ALERT_TOO_MANY_QUESTIONS'     => 'You have reached the maximum number of questions.',
-    'CMX_QUIZ_ALERT_INVALID_QUESTION_DATA'  => 'Please double check your quiz, there is an error stopping it from being submitted. Make sure that every question and answer has been filled in, and that each question has at least one answer marked as correct.',
+    'CMX_QUIZ_ALERT_INVALID_QUESTION_DATA'  => 'Please double check your quiz, there is an error stopping it from being submitted: ',
+    'CMX_QUIZ_ALERT_EMPTY_QUESTION'         => 'There is missing question text.',
+    'CMX_QUIZ_ALERT_MISSING_CORRECT'        => 'A question has no correct answer marked.',
+    'CMX_QUIZ_ALERT_QUESTION_MISMATCH'      => 'There is a mismatch with the number of answers and correct answers.',
+    'CMX_QUIZ_ALERT_MISSING_ANSWER'         => 'There is missing answer text.',
     'CMX_QUIZ_NAME'                         => 'Quiz name:',
     'CMX_QUIZ_DESCRIPTION'                  => 'Quiz description:',
     'CMX_QUIZ_NAME_EXPLAIN'                 => 'Enter a short title for this quiz',
@@ -99,6 +103,7 @@ $lang = array_merge($lang, [
     'CMX_QUIZ_RESULTS_PASSED'           => 'Passed',
     'CMX_QUIZ_RESULTS_FAILED'           => 'Failed',
     'CMX_QUIZ_NO_RESULTS'               => 'There are no quiz results to view yet.',
+    'CMX_QUIZ_NOT_ANSWERED'             => 'Not answered',
 
     // ACP modules and headings
     'ACP_CMX_QUIZ' => 'CMX Quiz',

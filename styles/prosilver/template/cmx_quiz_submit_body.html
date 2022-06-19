@@ -147,7 +147,13 @@
 
     // Lang vars
     var alertTooManyQuestions = "{{ lang('CMX_QUIZ_ALERT_TOO_MANY_QUESTIONS') }}";
+
+    // Validation when submitting quizzes
     var invalidQuestionData = "{{ lang('CMX_QUIZ_ALERT_INVALID_QUESTION_DATA') }}";
+    var invalidQuestionEmpty = "{{ lang('CMX_QUIZ_ALERT_EMPTY_QUESTION') }}";
+    var invalidQuestionMissingCorrect = "{{ lang('CMX_QUIZ_ALERT_MISSING_CORRECT') }}";
+    var invalidQuestionMismatch = "{{ lang('CMX_QUIZ_ALERT_QUESTION_MISMATCH') }}";
+    var invalidQuestionMissingAnswer = "{{ lang('CMX_QUIZ_ALERT_MISSING_ANSWER') }}";       
 </script>
 
 {% INCLUDEJS '@battye_cmxquiz/cmx_quiz.js' %}

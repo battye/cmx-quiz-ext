@@ -459,10 +459,15 @@ class quiz
 				$question['answers'] = $correct_answers;
 			}
 
+			// If there is no end time, then the user probably just exited the quiz without answering any questions.
+			$play_time = $this->user->format_date($quiz_result->start_time);
+			$time_taken = ($quiz_result->end_time != null) ? ceil(($quiz_result->end_time - $quiz_result->start_time) / 60) : 0;
+			$score_percentage = ($quiz_result->score_percentage != null) ? $quiz_result->score_percentage : number_format(0, 2);
+
 			$formatted_quiz_result = [
-				'play_time' => $this->user->format_date($quiz_result->end_time),
-				'time_taken' => ceil(($quiz_result->end_time - $quiz_result->start_time) / 60),
-				'score_percentage' => $quiz_result->score_percentage,
+				'play_time' => $play_time,
+				'time_taken' => $time_taken,
+				'score_percentage' => $score_percentage,
 				'display_questions' => $display_questions,
 				'played_by' => $this->manager->get_formatted_username($quiz_result->user_id),
 			];

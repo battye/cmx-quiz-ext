@@ -46,7 +46,11 @@
                     {{ question.question }}
                 </div>
                 <div class="cmx_quiz_result_column">
+                    {% if question.submission.answer is null %}
+                    <span>{{ lang('CMX_QUIZ_NOT_ANSWERED') }}</span>
+                    {% else %}
                     <span class="{% if question.submission.correct %}cmx_quiz_result_correct{% else %}cmx_quiz_result_incorrect{% endif %}">{{ question.submission.answer }}</span>
+                    {% endif %}
                 </div>
                 {% if CMX_QUIZ_SHOW_CORRECT_ANSWERS %}
                 <div class="cmx_quiz_result_column">
