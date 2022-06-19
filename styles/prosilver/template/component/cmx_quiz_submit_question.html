@@ -1,6 +1,6 @@
 <div class="panel cmx_quiz_panel" data-question="{{ counter }}">
     <div class="inner">
-        <h3>{{ lang('CMX_QUIZ_NEW_QUESTION') }}</h3>
+        <h3>{{ lang('CMX_QUIZ_NEW_QUESTION') }} <a href="javascript:void(0)" class="cmx_quiz_question_delete">[x]</a></h3>
 
         <div class="column1">
             {{ lang('CMX_QUIZ_ENTER_QUESTION_TEXT') }}
@@ -24,7 +24,7 @@
                     <input class="inputbox autowidth" type="text" name="answer[{{ counter }}][]" id="answer[{{ counter }}][]" 
                         {% if CMX_QUIZ_IS_EDIT %}value="{{ answer['answer'] }}"{% endif %} size="45" maxlength="124" />
                     <input class="inputbox autowidth" type="checkbox" name="correct_answer[{{ counter }}][]" 
-                        {% if CMX_QUIZ_IS_EDIT && answer['correct'] %}checked{% endif %} id="correct_answer[{{ counter }}][]" /> <a href="javascript:void(0)" data-id="{{ quiz_tag_id }}" class="cmx_quiz_answer_delete">[x]</a>
+                        {% if CMX_QUIZ_IS_EDIT && answer['correct'] %}checked{% endif %} id="correct_answer[{{ counter }}][]" /> <a href="javascript:void(0)" class="cmx_quiz_answer_delete">[x]</a>
                 </div>
             {% endfor %}
             </div>

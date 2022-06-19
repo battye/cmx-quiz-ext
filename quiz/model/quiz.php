@@ -323,13 +323,13 @@ class quiz extends \battye\cmxquiz\quiz\model\quiz_parent
             if ($question_count < (int) $config['cmx_quiz_minimum_questions'])
             {
                 // Validation error: not enough questions
-                $valid = false;
+                $valid = 'CMX_QUIZ_ALERT_TOO_FEW_QUESTIONS';
             }
 
             else if ($question_count > (int) $config['cmx_quiz_maximum_questions'])
             {
                 // Validation error: too many questions
-                $valid = false;
+                $valid = 'CMX_QUIZ_ALERT_TOO_MANY_QUESTIONS';
             }
 
             foreach ($question_data['questions'] as &$question)
@@ -337,7 +337,7 @@ class quiz extends \battye\cmxquiz\quiz\model\quiz_parent
                 // Validation error: empty question
                 if (!isset($question['question']) || empty($question['question']))
                 {
-                    $valid = false;
+                    $valid = 'CMX_QUIZ_ALERT_EMPTY_QUESTION';
                 }
 
                 // Supply BBCode to the question
@@ -349,7 +349,7 @@ class quiz extends \battye\cmxquiz\quiz\model\quiz_parent
                     // Validation error: empty answer
                     if (!isset($answer['answer']) || empty($answer['answer']))
                     {
-                        $valid = false;
+                        $valid = 'CMX_QUIZ_ALERT_MISSING_ANSWER';
                     }
 
                     // Supply BBCode to the answer
@@ -365,7 +365,7 @@ class quiz extends \battye\cmxquiz\quiz\model\quiz_parent
                 // Validation error: this question has no answer marked as correct     
                 if ($number_correct == 0)
                 {
-                    $valid = false;
+                    $valid = 'CMX_QUIZ_ALERT_MISSING_CORRECT';
                 }           
             }
         }
@@ -373,7 +373,7 @@ class quiz extends \battye\cmxquiz\quiz\model\quiz_parent
         else
         {
             // No question data
-            $valid = false;
+            $valid = 'CMX_QUIZ_ALERT_TOO_FEW_QUESTIONS';
         }
 
         $this->bbcode_uid = $uid;

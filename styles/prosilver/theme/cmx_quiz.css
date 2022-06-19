@@ -39,6 +39,10 @@
     margin-bottom: 5px;
 }
 
+h3 > .cmx_quiz_question_delete {
+    text-transform: lowercase;
+}
+
 /* Play */
 .cmx_quiz_play_blurb {
     margin-top: 15px;

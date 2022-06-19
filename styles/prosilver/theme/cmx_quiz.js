@@ -12,7 +12,7 @@ $(document).on('select click keyup focus', '.inputbox', function() {
 // Adding a new question
 $('#cmx_quiz_new_question').click(function() {
     // Add a new question panel
-    if (currentNumberOfQuestions >= maximumQuestions) {
+    if ($('.cmx_quiz_panel').length >= maximumQuestions) {
         alert(alertTooManyQuestions);
     }
 
@@ -58,10 +58,19 @@ $('#cmx_quiz_new_question').click(function() {
     }
 });
 
+// Deleting a question
+$(document).on('click', '.cmx_quiz_question_delete', function() {
+    if ($('.cmx_quiz_panel').length > 1) {
+        // Only remove a question if there is more than one
+        var parent = $(this).closest('.cmx_quiz_panel');
+        parent.remove();
+    }
+});
+
 // Deleting an answer
 $(document).on('click', '.cmx_quiz_answer_delete', function() {
     var parent = $(this).parent();
-    parent.remove();
+    parent.parent().remove();
 });
 
 // Adding an answer
@@ -104,6 +113,7 @@ $("#add_edit_form").submit(function(event) {
         if (questionText.length < 1) {
             // Validation error: empty question
             valid = false;
+console.log('4565');
             invalidReason = invalidQuestionEmpty;
         }
 
@@ -129,12 +139,14 @@ $("#add_edit_form").submit(function(event) {
         if (!atLeastOneCorrect) {
             // Validation error: this question has no answer marked as correct
             valid = false;
+console.log('11');
             invalidReason = invalidQuestionMissingCorrect;
         }
 
         if (correctAnswers.length != answerTexts.length) {
             // Validation error: some mismatch with the correct answers and the answers
             valid = false;
+console.log('1221');
             invalidReason = invalidQuestionMismatch;
         }
 
@@ -143,6 +155,7 @@ $("#add_edit_form").submit(function(event) {
             if (answerTexts[i].length < 1) {
                 // Validation error: empty answer
                 valid = false;
+console.log('333');
                 invalidReason = invalidQuestionMissingAnswer;
             }
 

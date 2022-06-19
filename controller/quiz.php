@@ -696,8 +696,10 @@ class quiz
 	 */
 	private function return_quiz_submission(\battye\cmxquiz\quiz\model\quiz $quiz)
 	{
-		$is_quiz_valid = strlen($quiz->quiz_name) > 0 && $quiz->validate_question_data($this->config);
-		$is_quiz_valid_message = 'CMX_QUIZ_ALERT_INVALID_QUESTION_DATA';
+		$quiz_validity = $quiz->validate_question_data($this->config);
+
+		$is_quiz_valid = (strlen($quiz->quiz_name) > 0 && $quiz_validity === true);
+		$is_quiz_valid_message = $this->language->lang('CMX_QUIZ_ALERT_INVALID_QUESTION_DATA');
 
 		if ($is_quiz_valid)
 		{
@@ -706,7 +708,7 @@ class quiz
 			{
 				if ($this->manager->delete_quiz($quiz))
 				{
-					$is_quiz_valid_message = 'CMX_QUIZ_DELETED_SUCCESSFULLY';
+					$is_quiz_valid_message = $this->language->lang('CMX_QUIZ_DELETED_SUCCESSFULLY');
 				}
 			}
 
@@ -715,11 +717,15 @@ class quiz
 			{
 				if ($this->manager->submit_quiz($quiz))
 				{
-					$is_quiz_valid_message = 'CMX_QUIZ_SUBMITTED_SUCCESSFULLY';
+					$is_quiz_valid_message = $this->language->lang('CMX_QUIZ_SUBMITTED_SUCCESSFULLY');
 				}
 			}
 		}
 
+		else 
+		{
+			$is_quiz_valid_message .= $this->language->lang($quiz_validity);
+		}
 		
 		$json_response = new \phpbb\json_response;
 
@@ -727,7 +733,7 @@ class quiz
 		return $json_response->send([
 			'IS_VALID'		=> $is_quiz_valid,
 			'MESSAGE_TITLE'	=> $this->language->lang('CMX_QUIZ_INFORMATION'),
-			'MESSAGE_TEXT'	=> $this->language->lang($is_quiz_valid_message),
+			'MESSAGE_TEXT'	=> $is_quiz_valid_message,
 			'REFRESH_DATA'	=> [
 				'url'		=> $this->helper->route('cmx_quiz_index'),
 				'time'		=> 3,
