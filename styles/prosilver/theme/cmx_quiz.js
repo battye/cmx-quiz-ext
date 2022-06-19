@@ -70,7 +70,7 @@ $(document).on('click', '.cmx_quiz_question_delete', function() {
 // Deleting an answer
 $(document).on('click', '.cmx_quiz_answer_delete', function() {
     var parent = $(this).parent();
-    parent.parent().remove();
+    parent.remove();
 });
 
 // Adding an answer
@@ -113,7 +113,6 @@ $("#add_edit_form").submit(function(event) {
         if (questionText.length < 1) {
             // Validation error: empty question
             valid = false;
-console.log('4565');
             invalidReason = invalidQuestionEmpty;
         }
 
@@ -139,14 +138,12 @@ console.log('4565');
         if (!atLeastOneCorrect) {
             // Validation error: this question has no answer marked as correct
             valid = false;
-console.log('11');
             invalidReason = invalidQuestionMissingCorrect;
         }
 
         if (correctAnswers.length != answerTexts.length) {
             // Validation error: some mismatch with the correct answers and the answers
             valid = false;
-console.log('1221');
             invalidReason = invalidQuestionMismatch;
         }
 
@@ -155,7 +152,6 @@ console.log('1221');
             if (answerTexts[i].length < 1) {
                 // Validation error: empty answer
                 valid = false;
-console.log('333');
                 invalidReason = invalidQuestionMissingAnswer;
             }
 
