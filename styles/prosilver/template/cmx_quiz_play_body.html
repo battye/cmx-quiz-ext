@@ -29,6 +29,12 @@
 
 <script>
     window.cqaEndpoint = '{{ U_CQA_ENDPOINT }}?src=ext';
+    window.lang = {
+        previous: "{{ lang('CMX_QUIZ_PLAY_PREVIOUS') }}",
+        next: "{{ lang('CMX_QUIZ_PLAY_NEXT') }}",
+        typeAnswer: "{{ lang('CMX_QUIZ_PLAY_TYPE_ANSWER') }}",
+        timeLimit: "{{ lang('CMX_QUIZ_PLAY_TIME_LIMIT_REACHED') }}",
+    }
 </script>
 
 {% INCLUDEJS '@battye_cmxquiz/cmx_quiz.js' %}

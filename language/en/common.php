@@ -78,6 +78,11 @@ $lang = array_merge($lang, [
     'CMX_QUIZ_PLAY_PASS_MARK_BLURB'         => 'The pass mark is <strong>%d%%</strong>.',
     'CMX_QUIZ_EXCEEDED_MAXIMUM_PLAYS'       => 'You have reached the maximum number of plays for this quiz.',
 
+    'CMX_QUIZ_PLAY_NEXT'                    => 'Next',
+    'CMX_QUIZ_PLAY_PREVIOUS'                => 'Previous',
+    'CMX_QUIZ_PLAY_TYPE_ANSWER'             => 'Type your answer here',
+    'CMX_QUIZ_PLAY_TIME_LIMIT_REACHED'      => 'The time limit has been reached!',
+
     // Index
     'CMX_QUIZ_NEW'                      => 'New Quiz',
     'CMX_QUIZ_SUBMITTER'                => 'Author',
