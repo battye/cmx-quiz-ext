@@ -73,7 +73,9 @@ class quiz_module
             $new_tags = [];
             $updated_tags = [];
 
-            $edited_tags = $request->variable('cmx_quiz_tags', [0 => '']);
+            // Set the third parameter to true because we could get foreign characters
+            // in the tag names.
+            $edited_tags = $request->variable('cmx_quiz_tags', [0 => ''], true);
 
             foreach ($edited_tags as $quiz_tag_id => $tag_name)
             {
