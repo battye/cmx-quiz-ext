@@ -210,7 +210,9 @@ class quiz
 			$raw_questions['questions'][$i]['question'] = $original_questions['questions'][$i]['question'];
 		}
 
-		$is_finished = ($is_submit && $request_question_number == $total_questions);
+		// We have to make sure the answer isn't empty, otherwise we won't even be able
+		// to load the first question.
+		$is_finished = ($is_submit && !empty($request_answer_supplied) && $request_question_number == $total_questions);
 
 		// Which question does the user want next
 		// $question_to_load is the question number the user will GO to
