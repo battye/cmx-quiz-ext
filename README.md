@@ -19,7 +19,7 @@ This is the successor to the Ultimate Quiz MOD for phpBB2.
   1. Unpack the downloaded release and copy files to the `ext/battye/cmxquiz` directory.
   2. Navigate in the ACP to `Customise -> Manage extensions`.
   3. Look for `CMX Quiz` under the Disabled Extensions list, and click its `Enable` link.
-  4. Set up and configure PayPal Donation by navigating in the ACP to `Extensions -> CMX Quiz`.
+  4. Set up and configure CMX Quiz by navigating in the ACP to `Extensions -> CMX Quiz`.
 
 ## Uninstall
   1. Navigate in the ACP to `Customise -> Extension Management -> Extensions`.
