@@ -3,14 +3,14 @@
         <h3>{{ lang('CMX_QUIZ_NEW_QUESTION') }} <a href="javascript:void(0)" class="cmx_quiz_question_delete">[x]</a></h3>
 
         <div class="column1">
-            {{ lang('CMX_QUIZ_ENTER_QUESTION_TEXT') }}
+            <span class="cmx_quiz_standard_text">{{ lang('CMX_QUIZ_ENTER_QUESTION_TEXT') }}</span>
             {% include 'posting_buttons.html' %}
             <textarea name="message[{{ counter }}]" id="message[{{ counter }}]" rows="5" cols="30" onselect="storeCaret(this);" onclick="storeCaret(this);" onkeyup="storeCaret(this);" onfocus="initInsertions();" class="inputbox" data-bbcode="true">{% if CMX_QUIZ_IS_EDIT %}{{ CMX_QUIZ_QUESTIONS['questions'][counter - 1]['question'] }}{% endif %}</textarea>
         </div>
 
         <div class="column2">
-            {{ lang('CMX_QUIZ_ENTER_ANSWER_TEXT') }}<br />
-            {{ lang('CMX_QUIZ_ENTER_ANSWER_TEXT_EXPLAIN') }}
+            <span class="cmx_quiz_standard_text">{{ lang('CMX_QUIZ_ENTER_ANSWER_TEXT') }}<br />
+            {{ lang('CMX_QUIZ_ENTER_ANSWER_TEXT_EXPLAIN') }}</span>
 
             {% if CMX_QUIZ_IS_EDIT %}
             {% set answers = CMX_QUIZ_QUESTIONS['questions'][counter - 1]['answers'] %}
@@ -24,12 +24,12 @@
                     <input class="inputbox autowidth" type="text" name="answer[{{ counter }}][]" id="answer[{{ counter }}][]" 
                         {% if CMX_QUIZ_IS_EDIT %}value="{{ answer['answer'] }}"{% endif %} size="45" maxlength="124" />
                     <input class="inputbox autowidth" type="checkbox" name="correct_answer[{{ counter }}][]" 
-                        {% if CMX_QUIZ_IS_EDIT && answer['correct'] %}checked{% endif %} id="correct_answer[{{ counter }}][]" /> <a href="javascript:void(0)" class="cmx_quiz_answer_delete">[x]</a>
+                        {% if CMX_QUIZ_IS_EDIT && answer['correct'] %}checked{% endif %} id="correct_answer[{{ counter }}][]" /> <a href="javascript:void(0)" class="cmx_quiz_standard_text cmx_quiz_answer_delete">[x]</a>
                 </div>
             {% endfor %}
             </div>
 
-            <a href="javascript:void(0)" class="cmx_quiz_answer_add">[+]</a>
+            <a href="javascript:void(0)" class="cmx_quiz_answer_add cmx_quiz_standard_text">[+]</a>
         </div>
     </div>
 </div>

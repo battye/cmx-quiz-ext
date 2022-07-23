@@ -1,3 +1,7 @@
+.cmx_quiz_standard_text {
+    font-size: 1.2em;
+}
+
 .cmx_quiz_played {
     background-image: url("./images/quiz_played.gif");
 }

@@ -755,6 +755,8 @@ class quiz
 			throw new \phpbb\exception\http_exception(401, 'CMX_QUIZ_NOT_LOGGED_IN');
 		}
 
+		$is_quiz_moderator = $this->manager->is_user_quiz_moderator($this->user->data['user_id']);
+
 		// Check minimum post count requirements
 		if ($this->config['cmx_quiz_minimum_posts'] > 0)
 		{
@@ -778,10 +780,8 @@ class quiz
 		{
 			$quiz_author = $quiz->user_id;
 
-			// If they are a quiz moderator, they can edit
-			$is_quiz_moderator = $this->manager->is_user_quiz_moderator($this->user->data['user_id']);
-
-			// Otherwise, if they are the user that submitted the quiz they can edit it too
+			// If they are a quiz moderator, they can edit. Otherwise, if they are the user that
+			// submitted the quiz they can edit it too
 			if (!$is_quiz_moderator && !($this->config['cmx_quiz_allow_user_submissions'] && $quiz_author == $this->user->data['user_id']))
 			{
 				throw new \phpbb\exception\http_exception(401, 'CMX_QUIZ_NOT_CREDENTIALLED');
@@ -790,25 +790,37 @@ class quiz
 
 		if ($page == self::PLAY_PAGE)
 		{
-			// Multiple attempts
+			// Multiple attempts - we want to check if multiple attempts is
+			// set to "No" (false) in the ACP
+			$user_plays = 0;
+			
+			/* @var \battye\cmxquiz\quiz\model\quiz_result $individual_quiz_result */
+			foreach ($quiz->get_quiz_results() as $individual_quiz_result)
+			{
+				if ($individual_quiz_result->user_id == $this->user->data['user_id'])
+				{
+					$user_plays++;
+				}
+			}
+
+			// If we allow multiple attempts, check against the quiz settings.
 			if ($this->config['cmx_quiz_allow_multiple_attempts'])
 			{
 				$quiz_maximum_attempts = (int) $quiz->maximum_attempts;
-				$user_plays = 0;
-				
-				/* @var \battye\cmxquiz\quiz\model\quiz_result $individual_quiz_result */
-				foreach ($quiz->get_quiz_results() as $individual_quiz_result)
-				{
-					if ($individual_quiz_result->user_id == $this->user->data['user_id'])
-					{
-						$user_plays++;
-					}
-				}
+				$multiple_attempts_error = ($quiz_maximum_attempts > 0 && $user_plays >= $quiz_maximum_attempts);
+			}
 
-				if ($quiz_maximum_attempts > 0 && $user_plays >= $quiz_maximum_attempts)
-				{
-					throw new \phpbb\exception\http_exception(401, 'CMX_QUIZ_EXCEEDED_MAXIMUM_PLAYS');
-				}
+			else
+			{
+				// If multiple attempts is not permitted, then if the user has played once they 
+				// can't play again
+				$multiple_attempts_error = ($user_plays >= 1);
+			}
+
+			// Throw the error unless it's a quiz moderator (so they can see stats and edit)
+			if ($multiple_attempts_error && !$is_quiz_moderator)
+			{
+				throw new \phpbb\exception\http_exception(401, 'CMX_QUIZ_EXCEEDED_MAXIMUM_PLAYS');
 			}
 		}
 
