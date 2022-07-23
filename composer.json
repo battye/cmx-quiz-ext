@@ -2,9 +2,9 @@
     "name": "battye/cmxquiz",
     "type": "phpbb-extension",
     "description": "An extension which adds a fun quiz feature to your forum.",
-    "homepage": "https://github.com/battye/ultimate-quiz-mod",
-    "version": "3.0.0",
-    "time": "2022-04-29",
+    "homepage": "https://github.com/battye/cmx-quiz-ext",
+    "version": "3.0.1",
+    "time": "2022-07-23",
     "license": "GPL-2.0-only",
     "authors": [
         {
