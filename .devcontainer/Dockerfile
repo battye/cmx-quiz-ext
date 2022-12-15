@@ -4,7 +4,7 @@ FROM mcr.microsoft.com/vscode/devcontainers/base:0-${VARIANT}
 
 # Install PHP
 RUN apt-get -y update
-RUN apt-get -y install php php-xml php-mbstring php-curl
+RUN apt-get -y install php php-xml php-mbstring php-curl php-zip
 
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
