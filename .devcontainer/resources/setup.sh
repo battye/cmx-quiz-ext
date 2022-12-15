@@ -20,4 +20,4 @@ EOFMYSQL
 
 # Download dependencies
 composer install
-composer create-project phpbb/phpbb /workspaces/cmx-quiz-ext/public
+composer create-project phpbb/phpbb /workspaces/phpbb

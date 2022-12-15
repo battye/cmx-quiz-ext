@@ -11,8 +11,8 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 
 # Set up the web root in the new public directory
 RUN sudo rm -rf /var/www/html \
-    && sudo mkdir /workspaces/cmx-quiz-ext/public \
-    && sudo ln -s /workspaces/cmx-quiz-ext/public /var/www/html
+    && sudo mkdir /workspaces/phpbb \
+    && sudo ln -s /workspaces/phpbb /var/www/html
 
 # Install MySQL
 RUN apt-get -y install mysql-server php-mysql
