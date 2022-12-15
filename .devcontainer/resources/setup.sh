@@ -25,6 +25,13 @@ composer install --no-interaction
 # Install phpBB
 echo "phpBB project"
 composer create-project --no-interaction phpbb/phpbb /workspaces/phpbb
-cp /workspaces/cmx-quiz-ext/resources/phpbb-config.yml /workspaces/phpbb/install/install-config.yml
+
+# Copy phpBB config
+echo "Copy phpBB config"
+cp /workspaces/cmx-quiz-ext/.devcontainer/resources/phpbb-config.yml /workspaces/phpbb/install/install-config.yml
+
+echo "Symlink extension"
 ln -s /workspaces/cmx-quiz-ext /workspaces/phpbb/ext/battye/cmx-quiz-ext
+
+echo "phpBB CLI install"
 php /workspaces/phpbb/install/phpbbcli.php install /workspaces/phpbb/install/install-config.yml
