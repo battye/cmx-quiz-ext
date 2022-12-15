@@ -10,9 +10,9 @@ RUN apt-get -y install php php-xml
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 # Set up the web root in the new public directory
+RUN echo "Symlink webroot"
 RUN sudo rm -rf /var/www/html \
-    && sudo mkdir -p /workspaces/phpbb \
-    && sudo ln -s /workspaces/phpbb /var/www/html
+    && sudo ln -s /workspaces/cmx-quiz-ext /var/www/html
 
 # Install MySQL
 RUN apt-get -y install mysql-server php-mysql
