@@ -20,4 +20,4 @@ EOFMYSQL
 
 # Download dependencies
 composer install
-composer create-project phpbb/phpbb /workspaces/phpbb
+composer create-project --no-interaction phpbb/phpbb /workspaces/phpbb
