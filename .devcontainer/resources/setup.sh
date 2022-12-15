@@ -21,5 +21,10 @@ EOFMYSQL
 # Download dependencies
 echo "Dependencies"
 composer install --no-interaction
+
+# Install phpBB
 echo "phpBB project"
 composer create-project --no-interaction phpbb/phpbb /workspaces/phpbb
+cp /workspaces/cmx-quiz-ext/resources/phpbb-config.yml /workspaces/phpbb/install/install-config.yml
+ln -s /workspaces/cmx-quiz-ext /workspaces/phpbb/ext/battye/cmx-quiz-ext
+php /workspaces/phpbb/install/phpbbcli.php install /workspaces/phpbb/install/install-config.yml
