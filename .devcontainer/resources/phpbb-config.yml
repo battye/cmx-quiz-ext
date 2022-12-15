@@ -35,4 +35,4 @@ installer:
         server_port: 80
         script_path: /
 
-    extensions: ['phpbb/viglink', 'battye/cmx-quiz-ext']
+    extensions: ['battye/cmxquiz']
