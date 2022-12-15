@@ -39,3 +39,6 @@ sudo ln -s /workspaces/cmx-quiz-ext /workspaces/phpbb/ext/battye/cmx-quiz-ext
 echo "phpBB CLI install"
 cd /workspaces/phpbb && composer install --no-interaction
 sudo php /workspaces/phpbb/install/phpbbcli.php install /workspaces/phpbb/install/install-config.yml
+rm -rf /workspaces/phpbb/install 
+
+echo "Completed"
