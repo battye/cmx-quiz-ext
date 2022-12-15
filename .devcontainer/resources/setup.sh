@@ -31,7 +31,9 @@ echo "Copy phpBB config"
 cp /workspaces/cmx-quiz-ext/.devcontainer/resources/phpbb-config.yml /workspaces/phpbb/install/install-config.yml
 
 echo "Symlink extension"
+mkdir /workspaces/phpbb/ext/battye
 ln -s /workspaces/cmx-quiz-ext /workspaces/phpbb/ext/battye/cmx-quiz-ext
 
 echo "phpBB CLI install"
+cd /workspaces/phpbb && composer install --no-interaction
 php /workspaces/phpbb/install/phpbbcli.php install /workspaces/phpbb/install/install-config.yml
