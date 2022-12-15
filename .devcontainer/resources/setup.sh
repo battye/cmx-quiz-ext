@@ -19,5 +19,7 @@ sudo mysql -u root<<EOFMYSQL
 EOFMYSQL
 
 # Download dependencies
-composer install
+echo "Dependencies"
+composer install --no-interaction
+echo "phpBB project"
 composer create-project --no-interaction phpbb/phpbb /workspaces/phpbb
