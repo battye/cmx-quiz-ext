@@ -34,7 +34,7 @@ echo "Symlink extension"
 sudo rm -rf /var/www/html
 sudo ln -s /workspaces/phpbb /var/www/html
 mkdir /workspaces/phpbb/ext/battye
-sudo ln -s /workspaces/cmx-quiz-ext /workspaces/phpbb/ext/battye/cmx-quiz-ext
+sudo ln -s /workspaces/cmx-quiz-ext /workspaces/phpbb/ext/battye/cmxquiz
 
 echo "phpBB CLI install"
 cd /workspaces/phpbb && composer install --no-interaction
