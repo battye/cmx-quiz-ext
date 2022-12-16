@@ -16,12 +16,12 @@
 			//"settings": {},
 			//"devPort": {},
 			// Specify which VS Code extensions to install (List of IDs)
-			"extensions": []
+			"extensions": ["xdebug.php-debug"]
 			}
 		},
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	"forwardPorts": [80],
+	"forwardPorts": [80, 9003],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
 	"postStartCommand": "bash .devcontainer/resources/setup.sh",

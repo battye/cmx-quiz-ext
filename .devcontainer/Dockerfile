@@ -12,6 +12,10 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 # Install MySQL
 RUN apt-get -y install mysql-server php-mysql
 
+# Xdebug
+RUN pecl install xdebug-3.1.2
+ADD resources/xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
+
 # Configure Apache
 RUN echo "Listen 8080" >> /etc/apache2/ports.conf && \
     a2enmod rewrite
