@@ -13,7 +13,10 @@
 	"customizations": {
 		// Configure properties specific to VS Code.
 		"vscode": {
-			//"settings": {},
+			"settings": {
+				// Allow Xdebug to listen to requests from remote (or container)
+				"remote.localPortHost": "allInterfaces"
+			},
 			//"devPort": {},
 			// Specify which VS Code extensions to install (List of IDs)
 			"extensions": ["xdebug.php-debug"]

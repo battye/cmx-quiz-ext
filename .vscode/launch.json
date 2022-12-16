@@ -11,7 +11,8 @@
             "port": 9003,
             "pathMappings": {
                 "/var/www/html/ext/battye/cmxquiz": "/workspaces/cmx-quiz-ext"
-            }
+            },
+            "log": true
         }
     ]
 }
