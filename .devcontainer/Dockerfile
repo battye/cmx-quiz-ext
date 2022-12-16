@@ -13,7 +13,7 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 RUN apt-get -y install mysql-server php-mysql
 
 # Xdebug
-ADD resources/xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
+ADD resources/xdebug.ini /etc/php/8.1/apache2/conf.d/xdebug.ini
 
 # Configure Apache
 RUN echo "Listen 8080" >> /etc/apache2/ports.conf && \
