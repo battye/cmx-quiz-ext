@@ -21,7 +21,7 @@
 		},
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	"forwardPorts": [80, 9003],
+	"forwardPorts": [80],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
 	"postStartCommand": "bash .devcontainer/resources/setup.sh",
